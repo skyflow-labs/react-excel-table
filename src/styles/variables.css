@@ -1,0 +1,273 @@
+/**
+ * skyflowlabs-excel CSS Custom Properties
+ *
+ * Override these variables to customize the table appearance.
+ * Import this file or define these variables in your global CSS.
+ */
+
+:root {
+  /* Primary colors */
+  --excel-primary: #30867B;
+  --excel-primary-hover: #2D9084;
+  --excel-primary-light: #E6F4F2;
+
+  /* Status colors */
+  --excel-danger: #ef4444;
+  --excel-danger-hover: #dc2626;
+  --excel-warning: #f59e0b;
+  --excel-warning-hover: #d97706;
+  --excel-success: #22c55e;
+  --excel-success-hover: #16a34a;
+  --excel-info: #3b82f6;
+  --excel-info-hover: #2563eb;
+
+  /* Neutral colors */
+  --excel-gray-50: #f9fafb;
+  --excel-gray-100: #f3f4f6;
+  --excel-gray-200: #e5e7eb;
+  --excel-gray-300: #d1d5db;
+  --excel-gray-400: #9ca3af;
+  --excel-gray-500: #6b7280;
+  --excel-gray-600: #4b5563;
+  --excel-gray-700: #374151;
+  --excel-gray-800: #1f2937;
+  --excel-gray-900: #111827;
+
+  /* Cell states */
+  --excel-cell-modified-bg: #2D9084;
+  --excel-cell-modified-text: #ffffff;
+  --excel-cell-readonly-bg: #f3f4f6;
+  --excel-cell-readonly-text: #6b7280;
+  --excel-cell-error-border: #f59e0b;
+  --excel-cell-focused-ring: #3b82f6;
+  --excel-cell-selected-bg: #eff6ff;
+
+  /* Cell hover */
+  --excel-cell-hover-bg: #f9fafb;
+
+  /* Row states */
+  --excel-row-linked-bg: #eff6ff;
+  --excel-row-readonly-bg: #f9fafb;
+  --excel-row-hover-bg: #f3f4f6;
+  --excel-row-selected-bg: #dbeafe;
+
+  /* Header */
+  --excel-header-font-weight: 600;
+
+  /* Borders */
+  --excel-border-color: #e5e7eb;
+  --excel-border-header: #d1d5db;
+  --excel-border-radius: 0.5rem;
+
+  /* Spacing */
+  --excel-cell-padding-x: 0.5rem;
+  --excel-cell-padding-y: 0.5rem;
+  --excel-row-height: 40px;
+  --excel-header-height: 42px;
+
+  /* Typography */
+  --excel-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --excel-font-size: 14px;
+  --excel-font-size-sm: 12px;
+  --excel-font-weight-normal: 400;
+  --excel-font-weight-medium: 500;
+  --excel-font-weight-semibold: 600;
+
+  /* Shadows */
+  --excel-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --excel-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --excel-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --excel-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --excel-transition-fast: 150ms ease;
+  --excel-transition-normal: 200ms ease;
+  --excel-transition-slow: 300ms ease;
+
+  /* Z-index layers */
+  --excel-z-dropdown: 10;
+  --excel-z-modal-backdrop: 40;
+  --excel-z-modal: 50;
+  --excel-z-fab: 40;
+  --excel-z-fullscreen: 50;
+}
+
+/**
+ * Dark Theme Example
+ * Uncomment or add [data-theme="dark"] to enable
+ */
+/*
+[data-theme="dark"],
+.dark {
+  --excel-primary: #4ade80;
+  --excel-primary-hover: #22c55e;
+  --excel-primary-light: #052e16;
+
+  --excel-gray-50: #111827;
+  --excel-gray-100: #1f2937;
+  --excel-gray-200: #374151;
+  --excel-gray-300: #4b5563;
+  --excel-gray-400: #6b7280;
+  --excel-gray-500: #9ca3af;
+  --excel-gray-600: #d1d5db;
+  --excel-gray-700: #e5e7eb;
+  --excel-gray-800: #f3f4f6;
+  --excel-gray-900: #f9fafb;
+
+  --excel-cell-modified-bg: #166534;
+  --excel-cell-modified-text: #ffffff;
+  --excel-cell-readonly-bg: #1f2937;
+  --excel-cell-readonly-text: #9ca3af;
+  --excel-cell-selected-bg: #1e3a5f;
+  --excel-cell-hover-bg: #1f2937;
+
+  --excel-row-linked-bg: #1e3a5f;
+  --excel-row-readonly-bg: #111827;
+  --excel-row-hover-bg: #1f2937;
+  --excel-row-selected-bg: #1e3a5f;
+
+  --excel-border-color: #374151;
+  --excel-border-header: #4b5563;
+}
+*/
+
+/* Base table styles */
+.excel-table {
+  font-family: var(--excel-font-family);
+  font-size: var(--excel-font-size);
+}
+
+.excel-table-cell {
+  padding: var(--excel-cell-padding-y) var(--excel-cell-padding-x);
+  height: var(--excel-row-height);
+}
+
+.excel-table-cell--modified {
+  background-color: var(--excel-cell-modified-bg);
+  color: var(--excel-cell-modified-text);
+}
+
+.excel-table-cell--readonly {
+  background-color: var(--excel-cell-readonly-bg);
+  color: var(--excel-cell-readonly-text);
+}
+
+.excel-table-row--linked {
+  background-color: var(--excel-row-linked-bg);
+}
+
+.excel-table-row--readonly {
+  background-color: var(--excel-row-readonly-bg);
+}
+
+.excel-table-row:hover {
+  background-color: var(--excel-row-hover-bg);
+}
+
+.excel-table-header {
+  height: var(--excel-header-height);
+  background-color: var(--excel-gray-100);
+  border-bottom: 1px solid var(--excel-border-header);
+  font-weight: var(--excel-font-weight-semibold);
+}
+
+/* ============================================
+ * Utility Classes for Common Customizations
+ * ============================================ */
+
+/**
+ * Compact table variant
+ * Usage: <ExcelTable className="excel-table--compact" />
+ */
+.excel-table--compact {
+  --excel-row-height: 32px;
+  --excel-header-height: 36px;
+  --excel-cell-padding-x: 0.375rem;
+  --excel-cell-padding-y: 0.25rem;
+  --excel-font-size: 12px;
+}
+
+/**
+ * Comfortable (spacious) table variant
+ * Usage: <ExcelTable className="excel-table--comfortable" />
+ */
+.excel-table--comfortable {
+  --excel-row-height: 48px;
+  --excel-header-height: 52px;
+  --excel-cell-padding-x: 0.75rem;
+  --excel-cell-padding-y: 0.625rem;
+  --excel-font-size: 15px;
+}
+
+/**
+ * Bordered table variant
+ * Usage: <ExcelTable className="excel-table--bordered" />
+ */
+.excel-table--bordered .excel-table-cell {
+  border: 1px solid var(--excel-border-color);
+}
+
+/**
+ * Striped rows
+ * Usage: <ExcelTable className="excel-table--striped" />
+ */
+.excel-table--striped .excel-table-row:nth-child(even) {
+  background-color: var(--excel-gray-50);
+}
+
+/**
+ * No borders variant
+ * Usage: <ExcelTable className="excel-table--borderless" />
+ */
+.excel-table--borderless {
+  --excel-border-color: transparent;
+  --excel-border-header: transparent;
+}
+
+/* ============================================
+ * Color Theme Presets
+ * ============================================ */
+
+/**
+ * Blue theme
+ * Usage: <ExcelTable className="excel-theme--blue" />
+ */
+.excel-theme--blue {
+  --excel-primary: #2563eb;
+  --excel-primary-hover: #1d4ed8;
+  --excel-primary-light: #dbeafe;
+  --excel-cell-modified-bg: #3b82f6;
+}
+
+/**
+ * Purple theme
+ * Usage: <ExcelTable className="excel-theme--purple" />
+ */
+.excel-theme--purple {
+  --excel-primary: #7c3aed;
+  --excel-primary-hover: #6d28d9;
+  --excel-primary-light: #ede9fe;
+  --excel-cell-modified-bg: #8b5cf6;
+}
+
+/**
+ * Orange theme
+ * Usage: <ExcelTable className="excel-theme--orange" />
+ */
+.excel-theme--orange {
+  --excel-primary: #ea580c;
+  --excel-primary-hover: #c2410c;
+  --excel-primary-light: #ffedd5;
+  --excel-cell-modified-bg: #f97316;
+}
+
+/**
+ * Rose theme
+ * Usage: <ExcelTable className="excel-theme--rose" />
+ */
+.excel-theme--rose {
+  --excel-primary: #e11d48;
+  --excel-primary-hover: #be123c;
+  --excel-primary-light: #ffe4e6;
+  --excel-cell-modified-bg: #f43f5e;
+}
