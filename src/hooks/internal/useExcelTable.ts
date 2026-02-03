@@ -22,6 +22,8 @@ import type {
 import { useCellEdit } from './useCellEdit';
 import { useTableActions } from './useTableActions';
 import { buildColumns } from '@/components/table/columns';
+import { calculateOptimalColumnWidthPrecise } from '@/utils/autosize/calculator';
+import type { CellDataType } from '@/types';
 
 /**
  * Main hook for the Excel table component
@@ -158,6 +160,46 @@ export function useExcelTable<TData extends RowData>({
   // Store the table reference for column rebuilds
   tableRef.current = table;
 
+  // Compute width overrides for autosize columns.
+  // This map is passed to TableHeader/TableBody so they can apply widths
+  // directly via inline styles instead of relying on column.getSize().
+  const columnWidthOverrides = useMemo<Record<string, number>>(() => {
+    const overrides: Record<string, number> = {};
+    for (const config of columnConfigs) {
+      const key = String(config.accessorKey);
+      if (config.autosize && expandedColumns[key]) {
+        overrides[key] = calculateOptimalColumnWidthPrecise(
+          internalData,
+          config.accessorKey,
+          config.header,
+          (config.dataType || 'string') as CellDataType,
+          config.dateFormat,
+          config.minWidth,
+          config.maxWidth
+        );
+      }
+    }
+    return overrides;
+  }, [columnConfigs, expandedColumns, internalData]);
+
+  // Compute total row width so that header/body can expand beyond the viewport
+  // when autosize columns are expanded, enabling horizontal scrolling.
+  const totalRowWidth = useMemo<number>(() => {
+    let total = 0;
+    if (editMode) total += 40; // selection column
+    for (const config of columnConfigs) {
+      const key = String(config.accessorKey);
+      if (columnWidthOverrides[key]) {
+        total += columnWidthOverrides[key];
+      } else if (config.autosize) {
+        total += config.minWidth ?? 80;
+      } else {
+        total += config.size ?? 140;
+      }
+    }
+    return total;
+  }, [columnConfigs, columnWidthOverrides, editMode]);
+
   // After the first render, trigger a column rebuild so that cell render
   // closures capture the real table instance (needed for keyboard navigation).
   // useLayoutEffect fires synchronously before paint, so the user never sees
@@ -245,6 +287,8 @@ export function useExcelTable<TData extends RowData>({
     columnFilters,
     columnFilterFlags,
     expandedColumns,
+    columnWidthOverrides,
+    totalRowWidth,
     modifiedCount,
     editedCells,
 

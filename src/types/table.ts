@@ -35,6 +35,12 @@ export interface TableState<TData extends RowData> {
 
   /** Expanded columns for autosize */
   expandedColumns: Record<string, boolean>;
+
+  /** Width overrides from autosize (column id → pixel width) */
+  columnWidthOverrides: Record<string, number>;
+
+  /** Total row width accounting for column overrides (enables horizontal scroll) */
+  totalRowWidth: number;
 }
 
 /**

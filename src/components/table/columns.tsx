@@ -11,7 +11,7 @@ import { EditableCell } from '@/components/cell/EditableCell';
 import { ReadOnlyCell } from '@/components/cell/ReadOnlyCell';
 import { formatDateValue } from '@/utils/formatters/date';
 import { formatCurrency } from '@/utils/formatters/currency';
-import { calculateOptimalColumnWidth } from '@/utils/autosize/calculator';
+import { calculateOptimalColumnWidthPrecise } from '@/utils/autosize/calculator';
 
 /**
  * Safe getter for row values
@@ -122,7 +122,7 @@ export function buildColumn<TData extends RowData>(
     searchable = false,
     autosize = false,
     minWidth = 80,
-    maxWidth = 400,
+    maxWidth = 800,
     meta,
     dateFormat,
   } = config;
@@ -130,10 +130,11 @@ export function buildColumn<TData extends RowData>(
   const key = accessorKey as string;
   const isExpanded = options.expandedColumns[key] ?? false;
 
-  // Calculate column size
+  // Calculate column size — when expanded, use precise canvas measurement
+  // to find the minimum width that shows all content without truncation.
   const computedSize = autosize
     ? isExpanded
-      ? calculateOptimalColumnWidth(
+      ? calculateOptimalColumnWidthPrecise(
           options.data,
           accessorKey,
           header,
@@ -167,7 +168,7 @@ export function buildColumn<TData extends RowData>(
     size: computedSize,
     minSize: minWidth,
     maxSize: maxWidth,
-    enableResizing: true,
+    enableResizing: false,
     meta: {
       dataType,
       selectOptions: meta?.selectOptions,

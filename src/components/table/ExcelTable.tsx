@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { RowData, ExcelTableProps } from '@/types';
 import { useExcelTable } from '@/hooks/internal/useExcelTable';
 import { useKeyboardNavigation } from '@/hooks/internal/useKeyboardNavigation';
@@ -53,6 +53,9 @@ export function ExcelTable<TData extends RowData>({
     handleSaveChanges,
     handleDiscardChanges,
     editedCells,
+    expandedColumns,
+    columnWidthOverrides,
+    totalRowWidth,
   } = useExcelTable({
     data,
     columns: columnConfigs,
@@ -69,15 +72,27 @@ export function ExcelTable<TData extends RowData>({
     toggleFullscreen,
   });
 
-  // Version counter that increments on data/cell changes to force
-  // react-window to re-render visible items with fresh cell values.
+  // Ref for header scroll sync — imperatively set scrollLeft (no re-renders)
+  const headerRef = useRef<HTMLDivElement>(null);
+  const handleBodyHorizontalScroll = useCallback((scrollLeft: number) => {
+    if (headerRef.current) headerRef.current.scrollLeft = scrollLeft;
+  }, []);
+
+  // Version counter that increments on data/cell/sizing changes to force
+  // react-window to re-render visible items with fresh cell values and widths.
   const dataVersionRef = useRef(0);
   const prevModifiedCellsRef = useRef(modifiedCells);
   const prevDataRef = useRef(internalData);
-  if (modifiedCells !== prevModifiedCellsRef.current || internalData !== prevDataRef.current) {
+  const prevExpandedRef = useRef(expandedColumns);
+  if (
+    modifiedCells !== prevModifiedCellsRef.current ||
+    internalData !== prevDataRef.current ||
+    expandedColumns !== prevExpandedRef.current
+  ) {
     dataVersionRef.current++;
     prevModifiedCellsRef.current = modifiedCells;
     prevDataRef.current = internalData;
+    prevExpandedRef.current = expandedColumns;
   }
 
   // Notify parent of modified cells changes
@@ -127,12 +142,20 @@ export function ExcelTable<TData extends RowData>({
       />
 
       <div className="flex-1 flex flex-col border border-gray-300 rounded-lg overflow-hidden min-h-0">
-        <TableHeader table={table} />
+        <TableHeader
+          table={table}
+          columnWidthOverrides={columnWidthOverrides}
+          totalRowWidth={totalRowWidth}
+          headerRef={headerRef}
+        />
         <TableBody
           table={table}
           isLinkedRow={isLinkedRow}
           isReadOnlyRow={isReadOnlyRow}
           dataVersion={dataVersionRef.current}
+          columnWidthOverrides={columnWidthOverrides}
+          totalRowWidth={totalRowWidth}
+          onHorizontalScroll={handleBodyHorizontalScroll}
         />
       </div>
 

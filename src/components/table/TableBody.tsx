@@ -1,4 +1,4 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo, useEffect, forwardRef, createContext, useContext } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { flexRender, type Table, type Row } from '@tanstack/react-table';
@@ -20,32 +20,67 @@ export interface TableBodyProps<TData extends RowData> {
   /** Version counter that increments on data/cell changes to force react-window re-renders */
   dataVersion?: number;
 
+  /** Width overrides from autosize (column id → pixel width) */
+  columnWidthOverrides?: Record<string, number>;
+
+  /** Total row width for horizontal scroll support */
+  totalRowWidth?: number;
+
+  /** Callback when body scrolls horizontally (for header sync) */
+  onHorizontalScroll?: (scrollLeft: number) => void;
+
   /** Custom class name */
   className?: string;
 }
 
-interface RowComponentProps {
-  row: Row<RowData>;
-  style: React.CSSProperties;
-  isLinked?: boolean;
-  isReadOnly?: boolean;
-}
+// Context to pass totalRowWidth to the custom inner element
+const TotalWidthContext = createContext<number>(0);
 
 /**
- * Memoized row component for virtualization.
- * Uses default React.memo shallow comparison instead of react-window's areEqual,
- * which is designed for the (data, index, style) pattern and can prevent
- * necessary re-renders when used with custom props.
+ * Custom inner element for FixedSizeList that expands beyond viewport width
+ * when columns are wider than the container (enables horizontal scroll).
  */
-const TableRow = memo(function TableRow({
+const InnerElement = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ style, ...rest }, ref) => {
+    const totalWidth = useContext(TotalWidthContext);
+    return (
+      <div
+        ref={ref}
+        style={{
+          ...style,
+          width: totalWidth > 0 ? totalWidth : style?.width,
+        }}
+        {...rest}
+      />
+    );
+  }
+);
+InnerElement.displayName = 'InnerElement';
+
+/**
+ * Row component for virtualization.
+ */
+function TableRow({
   row,
   style,
   isLinked,
   isReadOnly,
-}: RowComponentProps) {
+  widthOverrides,
+  totalRowWidth,
+}: {
+  row: Row<RowData>;
+  style: React.CSSProperties;
+  isLinked?: boolean;
+  isReadOnly?: boolean;
+  widthOverrides: Record<string, number>;
+  totalRowWidth: number;
+}) {
+  // Override react-window's width (which is constrained to viewport) with totalRowWidth
+  const rowStyle = totalRowWidth > 0 ? { ...style, width: totalRowWidth } : style;
+
   return (
     <div
-      style={style}
+      style={rowStyle}
       className={`
         flex border-b border-gray-200
         ${isLinked ? 'bg-blue-50' : ''}
@@ -53,38 +88,41 @@ const TableRow = memo(function TableRow({
         hover:bg-gray-50
       `}
     >
-      {row.getVisibleCells().map((cell) => (
-        <div
-          key={cell.id}
-          style={{
-            width: cell.column.getSize(),
-            minWidth: cell.column.columnDef.minSize,
-            maxWidth: cell.column.columnDef.maxSize,
-          }}
-          className="flex items-center border-r border-gray-200 last:border-r-0 overflow-hidden"
-        >
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </div>
-      ))}
+      {row.getVisibleCells().map((cell) => {
+        const overrideWidth = widthOverrides[cell.column.id];
+        return (
+          <div
+            key={cell.id}
+            style={{
+              width: overrideWidth ?? cell.column.getSize(),
+              minWidth: cell.column.columnDef.minSize,
+              maxWidth: overrideWidth ?? cell.column.columnDef.maxSize,
+              flexShrink: 0,
+            }}
+            className="flex items-center border-r border-gray-200 last:border-r-0 overflow-hidden"
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </div>
+        );
+      })}
     </div>
   );
-});
+}
 
 /**
  * Item data passed through react-window's itemData prop.
- * This ensures react-window re-renders visible items when data changes,
- * rather than relying solely on children reference changes.
  */
 interface ItemData {
   rows: Row<RowData>[];
   isLinkedRow?: (row: RowData) => boolean;
   isReadOnlyRow?: (row: RowData) => boolean;
   dataVersion: number;
+  widthOverrides: Record<string, number>;
+  totalRowWidth: number;
 }
 
 /**
  * Row renderer that reads data from itemData instead of closures.
- * This avoids stale closure issues with react-window's virtualization.
  */
 function RowRenderer({
   index,
@@ -107,6 +145,8 @@ function RowRenderer({
       style={style}
       isLinked={isLinked}
       isReadOnly={isReadOnly}
+      widthOverrides={data.widthOverrides}
+      totalRowWidth={data.totalRowWidth}
     />
   );
 }
@@ -120,23 +160,35 @@ export function TableBody<TData extends RowData>({
   isLinkedRow,
   isReadOnlyRow,
   dataVersion = 0,
+  columnWidthOverrides = {},
+  totalRowWidth = 0,
+  onHorizontalScroll,
   className = '',
 }: TableBodyProps<TData>) {
   const listRef = useRef<List>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
   const rows = table.getRowModel().rows;
 
-  // Memoize itemData to control when react-window re-renders items.
-  // When rows or dataVersion change, itemData changes, forcing react-window
-  // to re-render all visible items with fresh data.
   const itemData = useMemo<ItemData>(
     () => ({
       rows: rows as unknown as Row<RowData>[],
       isLinkedRow: isLinkedRow as unknown as ((row: RowData) => boolean) | undefined,
       isReadOnlyRow: isReadOnlyRow as unknown as ((row: RowData) => boolean) | undefined,
       dataVersion,
+      widthOverrides: columnWidthOverrides,
+      totalRowWidth,
     }),
-    [rows, isLinkedRow, isReadOnlyRow, dataVersion]
+    [rows, isLinkedRow, isReadOnlyRow, dataVersion, columnWidthOverrides, totalRowWidth]
   );
+
+  // Forward horizontal scroll events to parent for header sync
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el || !onHorizontalScroll) return;
+    const handleScroll = () => onHorizontalScroll(el.scrollLeft);
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [onHorizontalScroll]);
 
   if (rows.length === 0) {
     return (
@@ -148,21 +200,26 @@ export function TableBody<TData extends RowData>({
 
   return (
     <div className={`flex-1 min-h-0 ${className}`}>
-      <AutoSizer>
-        {({ height, width }) => (
-          <List
-            ref={listRef}
-            height={height}
-            width={width}
-            itemCount={rows.length}
-            itemSize={rowHeight}
-            itemData={itemData}
-            overscanCount={5}
-          >
-            {RowRenderer}
-          </List>
-        )}
-      </AutoSizer>
+      <TotalWidthContext.Provider value={totalRowWidth}>
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              key={dataVersion}
+              ref={listRef}
+              outerRef={outerRef}
+              height={height}
+              width={width}
+              itemCount={rows.length}
+              itemSize={rowHeight}
+              itemData={itemData}
+              overscanCount={5}
+              innerElementType={InnerElement}
+            >
+              {RowRenderer}
+            </List>
+          )}
+        </AutoSizer>
+      </TotalWidthContext.Provider>
     </div>
   );
 }

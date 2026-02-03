@@ -23,7 +23,7 @@ export function ReadOnlyCell({
   value,
   dataType,
   dateFormat,
-  className = 'px-2 py-1',
+  className = 'px-2 py-2 w-full h-full',
 }: ReadOnlyCellProps) {
   const renderValue = () => {
     switch (dataType) {
@@ -47,5 +47,5 @@ export function ReadOnlyCell({
     }
   };
 
-  return <div className={className}>{renderValue()}</div>;
+  return <div className={`excel-table-cell--readonly ${className}`}>{renderValue()}</div>;
 }

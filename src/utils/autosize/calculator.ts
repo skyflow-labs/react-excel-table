@@ -26,10 +26,10 @@ export interface AutosizeConfig {
 const DEFAULT_AUTOSIZE_CONFIG: AutosizeConfig = {
   defaultMinWidth: 80,
   defaultMaxWidth: 400,
-  cellPadding: 14,
-  headerPadding: 18,
-  charWidthEstimate: 6.21,
-  defaultFont: '14px system-ui, -apple-system, sans-serif',
+  cellPadding: 34,
+  headerPadding: 60,
+  charWidthEstimate: 7.2,
+  defaultFont: '16px system-ui, -apple-system, sans-serif',
 };
 
 /**
