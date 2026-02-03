@@ -127,9 +127,12 @@
     "import",
     "export"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/skyflowlabs/skyflowlabs-excel.git"
+    "url": "git+https://github.com/skyflowlabs/skyflowlabs-excel.git"
   },
   "bugs": {
     "url": "https://github.com/skyflowlabs/skyflowlabs-excel/issues"

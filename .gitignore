@@ -48,7 +48,7 @@ storybook-static
 
 # NPM
 .npm
-.npmrc
+.npmrc.local
 
 # Misc
 .cache
