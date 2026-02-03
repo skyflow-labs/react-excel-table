@@ -1,5 +1,5 @@
 {
-  "name": "@skyflowlabs/react-excel-table",
+  "name": "@skyflow-labs/react-excel-table",
   "version": "1.0.0",
   "description": "Excel-like editable data table for React with virtualization, keyboard navigation, and Excel import/export",
   "license": "MIT",
