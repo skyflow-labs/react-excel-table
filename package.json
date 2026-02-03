@@ -133,10 +133,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/skyflowlabs/skyflowlabs-excel.git"
+    "url": "git+https://github.com/skyflow-labs/react-excel-table.git"
   },
   "bugs": {
-    "url": "https://github.com/skyflowlabs/skyflowlabs-excel/issues"
+    "url": "https://github.com/skyflow-labs/react-excel-table/issues"
   },
-  "homepage": "https://github.com/skyflowlabs/skyflowlabs-excel#readme"
+  "homepage": "https://github.com/skyflow-labs/react-excel-table#readme"
 }
