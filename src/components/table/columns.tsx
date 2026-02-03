@@ -39,7 +39,7 @@ function safeGet<TData>(row: Row<TData> | TData, id: string): unknown {
 function notEmptyFilter<TData>(row: Row<TData>, id: string, flag: boolean): boolean {
   if (!flag) return true;
   const v = safeGet(row, id);
-  return v !== 0 && v !== '' && v != null && !(typeof v === 'string' && v.trim() === '');
+  return v !== '' && v != null && !(typeof v === 'string' && v.trim() === '');
 }
 
 /**

@@ -133,7 +133,7 @@ export function dateInputToISO(dateString: string): string {
       return '';
     }
 
-    const date = new Date(year, month - 1, day);
+    const date = new Date(Date.UTC(year, month - 1, day));
     return isValid(date) ? date.toISOString() : '';
   } catch {
     return '';

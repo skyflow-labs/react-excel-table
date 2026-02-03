@@ -101,7 +101,7 @@ export function useExcelExport<TData extends RowData>(
         const rowData: Record<string, unknown> = {};
 
         for (const col of exportColumns) {
-          let value = row[col.key];
+          const value = row[col.key];
 
           // Apply custom formatter
           let formattedValue: unknown = value;
@@ -111,6 +111,11 @@ export function useExcelExport<TData extends RowData>(
             formattedValue = formatCurrency(value as number);
           } else if (col.dataType === 'date' && value) {
             formattedValue = formatDateValue(value as string, 'yyyy-MM-dd');
+          }
+
+          // SECURITY: Prevent formula injection in Excel export
+          if (typeof formattedValue === 'string') {
+            formattedValue = neutralizeFormulaInjection(formattedValue);
           }
 
           rowData[String(col.key)] = formattedValue;
@@ -275,7 +280,16 @@ export function exportToCSV<TData extends RowData>(
   }
 
   // Build CSV content
-  const headers = exportColumns.map((col) => `"${col.header}"`).join(',');
+  const headers = exportColumns
+    .map((col) => {
+      let header = col.header;
+      // SECURITY: Prevent formula injection in CSV headers
+      if (preventFormulaInjection) {
+        header = neutralizeFormulaInjection(header);
+      }
+      return `"${header}"`;
+    })
+    .join(',');
   const rows = data.map((row) => {
     return exportColumns
       .map((col) => {

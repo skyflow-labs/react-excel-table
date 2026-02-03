@@ -1,5 +1,5 @@
-import { useRef, useCallback, memo } from 'react';
-import { FixedSizeList as List, areEqual } from 'react-window';
+import { useRef, useMemo, memo } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { flexRender, type Table, type Row } from '@tanstack/react-table';
 import type { RowData } from '@/types';
@@ -17,26 +17,32 @@ export interface TableBodyProps<TData extends RowData> {
   /** Check if row is read-only */
   isReadOnlyRow?: (row: TData) => boolean;
 
+  /** Version counter that increments on data/cell changes to force react-window re-renders */
+  dataVersion?: number;
+
   /** Custom class name */
   className?: string;
 }
 
-interface RowComponentProps<TData extends RowData> {
-  row: Row<TData>;
+interface RowComponentProps {
+  row: Row<RowData>;
   style: React.CSSProperties;
   isLinked?: boolean;
   isReadOnly?: boolean;
 }
 
 /**
- * Memoized row component for virtualization
+ * Memoized row component for virtualization.
+ * Uses default React.memo shallow comparison instead of react-window's areEqual,
+ * which is designed for the (data, index, style) pattern and can prevent
+ * necessary re-renders when used with custom props.
  */
-const TableRow = memo(function TableRow<TData extends RowData>({
+const TableRow = memo(function TableRow({
   row,
   style,
   isLinked,
   isReadOnly,
-}: RowComponentProps<TData>) {
+}: RowComponentProps) {
   return (
     <div
       style={style}
@@ -62,7 +68,48 @@ const TableRow = memo(function TableRow<TData extends RowData>({
       ))}
     </div>
   );
-}, areEqual);
+});
+
+/**
+ * Item data passed through react-window's itemData prop.
+ * This ensures react-window re-renders visible items when data changes,
+ * rather than relying solely on children reference changes.
+ */
+interface ItemData {
+  rows: Row<RowData>[];
+  isLinkedRow?: (row: RowData) => boolean;
+  isReadOnlyRow?: (row: RowData) => boolean;
+  dataVersion: number;
+}
+
+/**
+ * Row renderer that reads data from itemData instead of closures.
+ * This avoids stale closure issues with react-window's virtualization.
+ */
+function RowRenderer({
+  index,
+  style,
+  data,
+}: {
+  index: number;
+  style: React.CSSProperties;
+  data: ItemData;
+}) {
+  const row = data.rows[index];
+  if (!row) return null;
+
+  const isLinked = data.isLinkedRow?.(row.original) ?? false;
+  const isReadOnly = data.isReadOnlyRow?.(row.original) ?? false;
+
+  return (
+    <TableRow
+      row={row}
+      style={style}
+      isLinked={isLinked}
+      isReadOnly={isReadOnly}
+    />
+  );
+}
 
 /**
  * Virtualized table body component using react-window
@@ -72,30 +119,23 @@ export function TableBody<TData extends RowData>({
   rowHeight = 40,
   isLinkedRow,
   isReadOnlyRow,
+  dataVersion = 0,
   className = '',
 }: TableBodyProps<TData>) {
   const listRef = useRef<List>(null);
   const rows = table.getRowModel().rows;
 
-  // Row renderer for react-window
-  const Row = useCallback(
-    ({ index, style }: { index: number; style: React.CSSProperties }) => {
-      const row = rows[index];
-      if (!row) return null;
-
-      const isLinked = isLinkedRow?.(row.original) ?? false;
-      const isReadOnly = isReadOnlyRow?.(row.original) ?? false;
-
-      return (
-        <TableRow
-          row={row}
-          style={style}
-          isLinked={isLinked}
-          isReadOnly={isReadOnly}
-        />
-      );
-    },
-    [rows, isLinkedRow, isReadOnlyRow]
+  // Memoize itemData to control when react-window re-renders items.
+  // When rows or dataVersion change, itemData changes, forcing react-window
+  // to re-render all visible items with fresh data.
+  const itemData = useMemo<ItemData>(
+    () => ({
+      rows: rows as unknown as Row<RowData>[],
+      isLinkedRow: isLinkedRow as unknown as ((row: RowData) => boolean) | undefined,
+      isReadOnlyRow: isReadOnlyRow as unknown as ((row: RowData) => boolean) | undefined,
+      dataVersion,
+    }),
+    [rows, isLinkedRow, isReadOnlyRow, dataVersion]
   );
 
   if (rows.length === 0) {
@@ -116,9 +156,10 @@ export function TableBody<TData extends RowData>({
             width={width}
             itemCount={rows.length}
             itemSize={rowHeight}
+            itemData={itemData}
             overscanCount={5}
           >
-            {Row}
+            {RowRenderer}
           </List>
         )}
       </AutoSizer>

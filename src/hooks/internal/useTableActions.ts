@@ -151,22 +151,29 @@ export function useTableActions<TData extends RowData>({
    * Handle save changes
    */
   const handleSaveChanges = useCallback(async (): Promise<TData[]> => {
-    if (!onSave) return [];
+    if (!onSave || isSaving) return [];
 
     setIsSaving(true);
 
     try {
       const { newlyCreated, updatedData } = await onSave(data, modifiedCells);
 
-      // Build set of updated IDs
-      const updatedIds = new Set([
-        ...newlyCreated.map((r) => r.id),
-        ...updatedData.map((r) => r.id),
-      ]);
+      // Build maps for quick lookup
+      const updatedMap = new Map(updatedData.map((r) => [r.id, r]));
+      const newlyCreatedMap = new Map(newlyCreated.map((r) => [r.id, r]));
 
-      // Keep unchanged rows and add updated/new rows
-      const unchangedData = data.filter((row) => !updatedIds.has(row.id));
-      setData([...unchangedData, ...newlyCreated, ...updatedData]);
+      // Preserve original order: replace updated rows in-place
+      const preservedData = data.map((row) => {
+        if (updatedMap.has(row.id)) return updatedMap.get(row.id)!;
+        if (newlyCreatedMap.has(row.id)) return newlyCreatedMap.get(row.id)!;
+        return row;
+      });
+
+      // Append truly new rows (IDs not already in data)
+      const existingIds = new Set(data.map((r) => r.id));
+      const trulyNew = newlyCreated.filter((r) => !existingIds.has(r.id));
+
+      setData([...preservedData, ...trulyNew]);
 
       // Clear modified cells
       setModifiedCells({});
@@ -183,7 +190,7 @@ export function useTableActions<TData extends RowData>({
     } finally {
       setIsSaving(false);
     }
-  }, [data, onSave, setData, modifiedCells, setModifiedCells, onDataChange, notifications]);
+  }, [data, onSave, isSaving, setData, modifiedCells, setModifiedCells, onDataChange, notifications]);
 
   /**
    * Toggle fullscreen mode

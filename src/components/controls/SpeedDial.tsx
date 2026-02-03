@@ -4,6 +4,9 @@ export interface SpeedDialProps {
   /** Add row handler */
   onAdd?: () => void;
 
+  /** Whether delete mode is active (controlled by parent) */
+  deleteMode?: boolean;
+
   /** Toggle delete mode handler */
   onDeleteModeToggle?: (active: boolean) => void;
 
@@ -22,18 +25,16 @@ export interface SpeedDialProps {
  */
 export function SpeedDial({
   onAdd,
+  deleteMode = false,
   onDeleteModeToggle,
   isFullscreen,
   onToggleFullscreen,
   className = '',
 }: SpeedDialProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
 
   const handleDeleteModeToggle = () => {
-    const newMode = !deleteMode;
-    setDeleteMode(newMode);
-    onDeleteModeToggle?.(newMode);
+    onDeleteModeToggle?.(!deleteMode);
     setIsOpen(false);
   };
 

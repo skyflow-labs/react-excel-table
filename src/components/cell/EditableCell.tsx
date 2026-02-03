@@ -70,8 +70,15 @@ export function EditableCell<TData extends RowData>({
   dataType = 'string',
 }: EditableCellProps<TData>) {
   const [isEditing, setIsEditing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [_searchTerm, setSearchTerm] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Ref to track locally saved values before modifiedCells prop catches up
+  // This fixes a react-window virtualization issue where the column definition
+  // closure captures a stale modifiedCells reference (due to useEffect delay),
+  // causing the cell to briefly display the old value after blur.
+  const hasSavedValueRef = useRef(false);
+  const savedValueRef = useRef<CellValue>(null);
 
   // Computed properties
   const rowId = row.original.id;
@@ -93,9 +100,28 @@ export function EditableCell<TData extends RowData>({
     [dataType]
   );
 
-  // Check if cell is modified
-  const isCellModified = modifiedCells[rowId]?.[columnId] !== undefined;
-  const currentValue = isCellModified ? modifiedCells[rowId][columnId] : initialValue;
+  // Check if cell is modified - accounts for stale modifiedCells from column closures
+  const modifiedValue = modifiedCells[rowId]?.[columnId];
+  const hasModifiedEntry = modifiedValue !== undefined;
+
+  let currentValue: CellValue;
+  if (hasModifiedEntry) {
+    if (hasSavedValueRef.current && savedValueRef.current !== modifiedValue) {
+      // We have a newer saved value that modifiedCells hasn't caught up to yet
+      currentValue = savedValueRef.current;
+    } else {
+      // modifiedCells is current - use it and clear the saved ref
+      currentValue = modifiedValue;
+      hasSavedValueRef.current = false;
+    }
+  } else if (hasSavedValueRef.current) {
+    // modifiedCells doesn't have our entry yet (stale closure) - use saved value
+    currentValue = savedValueRef.current;
+  } else {
+    currentValue = initialValue;
+  }
+
+  const isCellModified = hasModifiedEntry || hasSavedValueRef.current;
 
   // Get select options
   const selectOptions = useMemo<SelectOption[]>(() => {
@@ -131,13 +157,13 @@ export function EditableCell<TData extends RowData>({
 
   const [editValue, setEditValue] = useState<string | number>(getInitialValue());
 
-  // Filtered select options
-  const filteredOptions = useMemo(() => {
-    if (!cellTypes.isSelectColumn) return [];
-    return selectOptions.filter((opt) =>
-      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [cellTypes.isSelectColumn, selectOptions, searchTerm]);
+  // Re-sync editValue when currentValue changes externally (e.g., discard, external data update)
+  // but only when the cell is NOT being edited to avoid overwriting user input
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(getInitialValue());
+    }
+  }, [currentValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Focus input when editing starts
   useEffect(() => {
@@ -198,6 +224,11 @@ export function EditableCell<TData extends RowData>({
   const updateCellValue = useCallback(
     (newValue: CellValue) => {
       const processedValue = processValue(newValue);
+
+      // Store the saved value locally so we can display it immediately,
+      // even before modifiedCells prop catches up from the parent
+      hasSavedValueRef.current = true;
+      savedValueRef.current = processedValue;
 
       onEdit(rowId, columnId, processedValue);
       setModifiedCells((prev) => ({
@@ -306,8 +337,13 @@ export function EditableCell<TData extends RowData>({
         case 'Enter':
           e.preventDefault();
           if (cellTypes.isSelectColumn) {
-            const match = filteredOptions.find((opt) => !opt.disabled);
-            if (match) handleSelect(match.value);
+            // SelectCell handles its own Enter key — don't double-fire
+            return;
+          } else if (cellTypes.isBooleanColumn) {
+            // BooleanCell handles its own toggle via onChange — just navigate
+            resetState();
+            navigateToCell(rowIndex, columnIndex + 1);
+            return;
           } else {
             autoSave(true, rowIndex, columnIndex + 1);
           }
@@ -351,13 +387,13 @@ export function EditableCell<TData extends RowData>({
     },
     [
       cellTypes.isSelectColumn,
-      filteredOptions,
-      handleSelect,
+      cellTypes.isBooleanColumn,
       autoSave,
       rowIndex,
       columnIndex,
       getInitialValue,
       resetState,
+      navigateToCell,
     ]
   );
 
@@ -396,6 +432,7 @@ export function EditableCell<TData extends RowData>({
           value={String(editValue)}
           options={selectOptions}
           onChange={handleSelect}
+          onBlur={() => autoSave()}
           onKeyDown={handleKeyDown}
           isModified={isCellModified}
           showAddNew={!!meta?.onAddNew}
@@ -427,10 +464,9 @@ export function EditableCell<TData extends RowData>({
       return (
         <BooleanCell
           ref={inputRef}
-          value={Boolean(editValue)}
+          value={Boolean(currentValue)}
           onChange={(val) => {
             updateCellValue(val);
-            resetState();
           }}
           onKeyDown={handleKeyDown}
           isModified={isCellModified}

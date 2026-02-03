@@ -1,9 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
-import type { ColumnDef } from '@tanstack/react-table';
+import { useState, useEffect, useRef } from 'react';
 import type { RowData, ExcelTableProps } from '@/types';
 import { useExcelTable } from '@/hooks/internal/useExcelTable';
 import { useKeyboardNavigation } from '@/hooks/internal/useKeyboardNavigation';
-import { buildColumns } from './columns';
 import { TableHeader } from './TableHeader';
 import { TableBody } from './TableBody';
 import { TableControls } from '@/components/controls/TableControls';
@@ -40,12 +38,12 @@ export function ExcelTable<TData extends RowData>({
   defaultFullscreen: _defaultFullscreen = false,
   className = '',
 }: ExcelTableProps<TData>) {
-  // Main table logic
+  // Main table logic — columns are built inside the hook and passed
+  // directly to useReactTable, so getHeaderGroups() works on first render.
   const {
     table,
     data: internalData,
     modifiedCells,
-    setModifiedCells,
     editMode,
     setEditMode,
     isFullscreen,
@@ -54,12 +52,7 @@ export function ExcelTable<TData extends RowData>({
     handleAddRow,
     handleSaveChanges,
     handleDiscardChanges,
-    columnFilterFlags,
-    setColumnFilterFlag,
-    expandedColumns,
-    handleColumnExpansionToggle,
     editedCells,
-    handleCellEdit,
   } = useExcelTable({
     data,
     columns: columnConfigs,
@@ -76,52 +69,21 @@ export function ExcelTable<TData extends RowData>({
     toggleFullscreen,
   });
 
+  // Version counter that increments on data/cell changes to force
+  // react-window to re-render visible items with fresh cell values.
+  const dataVersionRef = useRef(0);
+  const prevModifiedCellsRef = useRef(modifiedCells);
+  const prevDataRef = useRef(internalData);
+  if (modifiedCells !== prevModifiedCellsRef.current || internalData !== prevDataRef.current) {
+    dataVersionRef.current++;
+    prevModifiedCellsRef.current = modifiedCells;
+    prevDataRef.current = internalData;
+  }
+
   // Notify parent of modified cells changes
   useEffect(() => {
     onModifiedCellsChange?.(modifiedCells);
   }, [modifiedCells, onModifiedCellsChange]);
-
-  // Build columns with all options
-  const columns = useMemo<ColumnDef<TData>[]>(
-    () =>
-      buildColumns({
-        columns: columnConfigs,
-        handleCellEdit,
-        table,
-        modifiedCells,
-        setModifiedCells,
-        editMode,
-        columnFilters: columnFilterFlags,
-        setColumnFilters: (columnId: string, enabled: boolean) => {
-          setColumnFilterFlag(columnId, enabled);
-        },
-        expandedColumns,
-        setExpandedColumns: (columnId: string) => {
-          handleColumnExpansionToggle(columnId);
-        },
-        data: internalData,
-        isReadOnlyRow,
-      }),
-    [
-      columnConfigs,
-      handleCellEdit,
-      table,
-      modifiedCells,
-      setModifiedCells,
-      editMode,
-      columnFilterFlags,
-      setColumnFilterFlag,
-      expandedColumns,
-      handleColumnExpansionToggle,
-      internalData,
-      isReadOnlyRow,
-    ]
-  );
-
-  // Update table columns when they change
-  useEffect(() => {
-    table.setOptions((prev) => ({ ...prev, columns }));
-  }, [table, columns]);
 
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -155,7 +117,7 @@ export function ExcelTable<TData extends RowData>({
     );
   }
 
-  const TableContent = () => (
+  const tableContent = (
     <>
       <TableControls
         editedCellsCount={editedCells.length}
@@ -170,11 +132,13 @@ export function ExcelTable<TData extends RowData>({
           table={table}
           isLinkedRow={isLinkedRow}
           isReadOnlyRow={isReadOnlyRow}
+          dataVersion={dataVersionRef.current}
         />
       </div>
 
       <SpeedDial
         onAdd={onAddRow ? handleAddRow : undefined}
+        deleteMode={editMode}
         onDeleteModeToggle={(active) => {
           setEditMode(active);
           if (!active) {
@@ -218,11 +182,11 @@ export function ExcelTable<TData extends RowData>({
 
   return isFullscreen ? (
     <div className="fixed inset-0 z-50 bg-white flex flex-col p-4">
-      <TableContent />
+      {tableContent}
     </div>
   ) : (
     <div className={`w-full h-full flex flex-col space-y-4 relative ${className}`}>
-      <TableContent />
+      {tableContent}
     </div>
   );
 }

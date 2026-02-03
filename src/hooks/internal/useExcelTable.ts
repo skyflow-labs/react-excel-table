@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,6 +9,7 @@ import {
   type SortingState,
   type ColumnFiltersState,
   type ColumnDef,
+  type Table,
 } from '@tanstack/react-table';
 
 import type {
@@ -20,6 +21,7 @@ import type {
 } from '@/types';
 import { useCellEdit } from './useCellEdit';
 import { useTableActions } from './useTableActions';
+import { buildColumns } from '@/components/table/columns';
 
 /**
  * Main hook for the Excel table component
@@ -47,12 +49,12 @@ import { useTableActions } from './useTableActions';
  */
 export function useExcelTable<TData extends RowData>({
   data: externalData,
-  columns: _columnConfigs,
+  columns: columnConfigs,
   onDataChange,
   onAddRow,
   onDelete,
   onSave,
-  isReadOnlyRow: _isReadOnlyRow,
+  isReadOnlyRow,
 }: UseExcelTableProps<TData>): UseExcelTableReturn<TData> {
   // Internal state
   const [internalData, setInternalData] = useState<TData[]>(externalData);
@@ -63,9 +65,19 @@ export function useExcelTable<TData extends RowData>({
   const [columnFilterFlags, setColumnFilterFlags] = useState<Record<string, boolean>>({});
   const [expandedColumns, setExpandedColumns] = useState<Record<string, boolean>>({});
 
-  // Sync external data to internal state
+  // Ref to hold the table instance, used to break the circular dependency:
+  // buildColumns needs `table` (for cell navigation), but useReactTable needs `columns`.
+  // On the first render, tableRef.current is null — headers still render correctly
+  // because header functions don't use `table`, and cell navigation has a null check.
+  // useLayoutEffect sets tableReady=true synchronously before paint, triggering a
+  // second render where columns are rebuilt with the real table reference.
+  const tableRef = useRef<Table<TData>>(null!);
+  const [tableReady, setTableReady] = useState(false);
+
+  // Sync external data to internal state and clear stale modifications
   useEffect(() => {
     setInternalData(externalData);
+    setModifiedCells({});
   }, [externalData]);
 
   // Cell edit handler
@@ -74,13 +86,61 @@ export function useExcelTable<TData extends RowData>({
     setModifiedCells,
   });
 
-  // Create empty columns array (will be set after table creation)
-  const emptyColumns: ColumnDef<TData>[] = useMemo(() => [], []);
+  // Handle column expansion toggle
+  const handleColumnExpansionToggle = useCallback((columnId: string) => {
+    setExpandedColumns((prev) => ({
+      ...prev,
+      [columnId]: !prev[columnId],
+    }));
+  }, []);
 
-  // Create table instance
+  // Handle column filter flag
+  const setColumnFilterFlag = useCallback((columnId: string, enabled: boolean) => {
+    setColumnFilterFlags((prev) => ({
+      ...prev,
+      [columnId]: enabled,
+    }));
+  }, []);
+
+  // Build columns directly — passed to useReactTable instead of being patched via useEffect.
+  // This ensures getHeaderGroups() returns correct headers on every render.
+  const columns = useMemo<ColumnDef<TData>[]>(
+    () =>
+      buildColumns({
+        columns: columnConfigs,
+        handleCellEdit,
+        table: tableRef.current,
+        modifiedCells,
+        setModifiedCells,
+        editMode,
+        columnFilters: columnFilterFlags,
+        setColumnFilters: setColumnFilterFlag,
+        expandedColumns,
+        setExpandedColumns: handleColumnExpansionToggle,
+        data: internalData,
+        isReadOnlyRow,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tableReady triggers rebuild after tableRef is set
+    [
+      tableReady,
+      columnConfigs,
+      handleCellEdit,
+      modifiedCells,
+      setModifiedCells,
+      editMode,
+      columnFilterFlags,
+      setColumnFilterFlag,
+      expandedColumns,
+      handleColumnExpansionToggle,
+      internalData,
+      isReadOnlyRow,
+    ]
+  );
+
+  // Create table instance with fully-built columns
   const table = useReactTable<TData>({
     data: internalData,
-    columns: emptyColumns,
+    columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -94,6 +154,17 @@ export function useExcelTable<TData extends RowData>({
     },
     enableRowSelection: editMode,
   });
+
+  // Store the table reference for column rebuilds
+  tableRef.current = table;
+
+  // After the first render, trigger a column rebuild so that cell render
+  // closures capture the real table instance (needed for keyboard navigation).
+  // useLayoutEffect fires synchronously before paint, so the user never sees
+  // the intermediate state.
+  useLayoutEffect(() => {
+    if (!tableReady) setTableReady(true);
+  }, [tableReady]);
 
   // Table actions
   const {
@@ -133,22 +204,6 @@ export function useExcelTable<TData extends RowData>({
     setModifiedCells({});
     setInternalData(externalData);
   }, [externalData]);
-
-  // Handle column expansion toggle
-  const handleColumnExpansionToggle = useCallback((columnId: string) => {
-    setExpandedColumns((prev) => ({
-      ...prev,
-      [columnId]: !prev[columnId],
-    }));
-  }, []);
-
-  // Handle column filter flag
-  const setColumnFilterFlag = useCallback((columnId: string, enabled: boolean) => {
-    setColumnFilterFlags((prev) => ({
-      ...prev,
-      [columnId]: enabled,
-    }));
-  }, []);
 
   // Handle delete selected
   const handleDeleteSelected = useCallback(async () => {

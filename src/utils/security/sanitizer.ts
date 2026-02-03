@@ -58,7 +58,7 @@ function getFileExtension(filename: string): string {
 const FORMULA_INJECTION_PATTERNS = [
   /^=/,      // Excel/Sheets formula
   /^\+/,     // Can be interpreted as formula
-  /^-/,      // Can be interpreted as negative or formula
+  /^-(?![0-9.]+$)/, // Formula prefix, but not pure negative numbers like -100 or -.5
   /^@/,      // DDE commands in Excel
   /^\|/,     // Pipe command execution
   /^%0A/,    // URL-encoded newline (can break out of cells)
@@ -71,12 +71,14 @@ const HTML_TAG_PATTERN = /<[^>]*>/g;
 
 /**
  * Dangerous HTML/XSS patterns
+ * Uses [\s\S] to handle whitespace/newline obfuscation in event handlers
  */
 const XSS_PATTERNS = [
-  /javascript:/gi,
-  /vbscript:/gi,
-  /data:/gi,
-  /on\w+\s*=/gi, // Event handlers like onclick=, onerror=
+  /javascript\s*:/gi,
+  /vbscript\s*:/gi,
+  /data\s*:/gi,
+  // eslint-disable-next-line no-control-regex
+  /on[\s\u0000]*\w+[\s\u0000]*=/gi, // Event handlers like onclick=, on\nclick=, on\0click=
   /<script/gi,
   /<\/script/gi,
   /<iframe/gi,
@@ -126,17 +128,25 @@ export function sanitizeCellValue(
   if (typeof value === 'string') {
     let sanitized = value;
 
+    // Remove null bytes before all checks (prevents bypass via \0 insertion)
+    sanitized = sanitized.replace(/\0/g, '');
+
     // Trim whitespace
     if (config.trimWhitespace) {
       sanitized = sanitized.trim();
     }
 
-    // Strip HTML tags
+    // Strip HTML tags iteratively until no tags remain
+    // (handles nested tricks like <scr<script>ipt>)
     if (config.stripHtml) {
-      sanitized = sanitized.replace(HTML_TAG_PATTERN, '');
+      let prev: string;
+      do {
+        prev = sanitized;
+        sanitized = sanitized.replace(HTML_TAG_PATTERN, '');
+      } while (sanitized !== prev);
     }
 
-    // Sanitize for XSS
+    // Sanitize for XSS (run after stripping to catch any residual patterns)
     if (config.sanitizeText) {
       for (const pattern of XSS_PATTERNS) {
         sanitized = sanitized.replace(pattern, '');
@@ -333,6 +343,7 @@ export function isSuspiciousFilename(filename: string): boolean {
   const suspicious = [
     /\.\./,      // Path traversal
     /^\/|^\\|^[A-Z]:/i, // Absolute paths
+    // eslint-disable-next-line no-control-regex
     /[\x00-\x1f]/,  // Control characters
     /[<>:"|?*]/,    // Invalid filename chars
     /%[0-9a-f]{2}/i, // URL encoding

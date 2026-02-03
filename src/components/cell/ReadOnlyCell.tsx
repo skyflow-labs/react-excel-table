@@ -40,7 +40,7 @@ export function ReadOnlyCell({
         return value ? 'Yes' : 'No';
 
       case 'number':
-        return value ? Number(value).toLocaleString() : '';
+        return value != null ? Number(value).toLocaleString() : '';
 
       default:
         return String(value ?? '');
