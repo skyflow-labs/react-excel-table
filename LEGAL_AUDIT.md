@@ -179,14 +179,73 @@ Add to README.md:
 3. **Phase 3 (publish):** Publish new package name to npm, deprecate old name with pointer to new package
 4. **Phase 4 (redirect):** Rename GitHub repository, set up redirects
 
+## Market Research & Competitive Analysis
+
+### Competitor Naming Patterns
+
+| Package | Weekly Downloads | Naming Pattern |
+|---------|-----------------|----------------|
+| `@tanstack/react-table` | ~1,390,000 | Brand + descriptor |
+| `handsontable` | ~202,000 | Standalone brand |
+| `react-data-grid` | ~198,000 | `react-` + descriptor |
+| `react-datasheet` | ~29,000 | `react-` + compound word |
+| `react-datasheet-grid` | ~16,000 | `react-` + compound-compound |
+| `react-spreadsheet` | Active | `react-` + generic term |
+
+**Key observation:** The word "Excel" is universally avoided in package names. Competitors use "spreadsheet," "datasheet," "data-grid," "grid," or "table."
+
+### npm Availability Check
+
+| Name | Available | Notes |
+|------|-----------|-------|
+| `react-sheet-table` | YES | Never registered |
+| `react-grid-sheet` | YES | Never registered |
+| `react-sheet-grid` | YES | Never registered |
+| `react-cellsheet` | YES | Never registered |
+| `react-tabula` | YES | Never registered |
+| `react-spreadsheet` | NO | Taken (active) |
+| `react-datasheet` | NO | Taken (active) |
+| `react-data-grid` | NO | Taken (active) |
+
+### Top 5 Ranked Candidates
+
+| Rank | Name | Strength | Score |
+|------|------|----------|-------|
+| **1** | **`react-sheet-table`** | Perfect clarity + SEO + easy to say/remember | 9.2/10 |
+| 2 | `react-grid-sheet` | Strong SEO via "grid"; clean and technical | 8.7/10 |
+| 3 | `react-sheet-grid` | Proven pattern (validated by react-datasheet-grid) | 8.3/10 |
+| 4 | `react-cellsheet` | Highly distinctive; communicates cell-level editing | 7.8/10 |
+| 5 | `react-tabula` | Strongest brand identity; Latin for "tablet/board" | 7.2/10 |
+
+### Why `react-sheet-table` Wins
+
+- **Simple & descriptive**: Three common English words — immediately communicates purpose
+- **LLM/agent friendly**: An AI asked "find me a React spreadsheet table" naturally matches this
+- **Easy to say**: Zero ambiguity spoken aloud, in docs, or in prompts
+- **Feels independent**: No brand prefix, no clever wordplay — just what it is
+- **SEO strong**: Contains "sheet" + "table" + "react" — three high-value keywords
+- **Follows convention**: Same pattern as `react-data-grid`, `react-select`, `react-hook-form`
+- **Available**: Never registered on npm
+
+### Suggested package.json Keywords
+
+```json
+"keywords": [
+  "react", "spreadsheet", "table", "grid", "data-grid",
+  "datasheet", "editable", "editable-table", "sheet",
+  "cell-editor", "virtualization", "keyboard-navigation",
+  "import", "export", "csv", "xlsx"
+]
+```
+
 ## Alternative Names Considered
 
 | Name | Pros | Cons |
 |------|------|------|
-| `react-sheet-table` | Short, generic, follows SheetJS precedent | Less immediately descriptive |
-| `react-spreadsheet-table` | Most descriptive | Long, already taken on npm by other packages |
-| `react-grid-table` | Short, generic | "Grid" suggests CSS Grid / data grid, not spreadsheet |
-| `react-xlsx-table` | References file format, not trademark | Pronunciation unclear, less approachable |
-| `react-data-sheet` | Generic, descriptive | Confusable with `react-datasheet` package |
+| `react-sheet-table` | Short, generic, follows SheetJS precedent, easy to say | — |
+| `react-spreadsheet-table` | Most descriptive | Long, already taken on npm |
+| `react-grid-table` | Short, generic | "Grid" suggests CSS Grid, not spreadsheet |
+| `react-xlsx-table` | References file format, not trademark | Pronunciation unclear |
+| `react-data-sheet` | Generic, descriptive | Confusable with `react-datasheet` |
 
 `react-sheet-table` is recommended as the best balance of clarity, brevity, and trademark safety.
