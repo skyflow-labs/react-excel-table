@@ -186,7 +186,9 @@ export function useTableActions<TData extends RowData>({
     } catch (error) {
       console.error('Save error:', error);
       notifications.error('Error saving changes');
-      return [];
+      // Re-throw so callers (e.g. ExcelTable's handleSaveWithErrorCapture)
+      // can surface the error in the UI
+      throw error;
     } finally {
       setIsSaving(false);
     }
