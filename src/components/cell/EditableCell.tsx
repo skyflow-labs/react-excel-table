@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, type MutableRefObject } from 'react';
 import type { Row, Column, Table } from '@tanstack/react-table';
 import type {
   CellDataType,
@@ -33,11 +33,8 @@ export interface EditableCellProps<TData extends RowData> {
   /** Table instance */
   table: Table<TData>;
 
-  /** Modified cells record */
-  modifiedCells: ModifiedCells;
-
-  /** Modified cells setter */
-  setModifiedCells: React.Dispatch<React.SetStateAction<ModifiedCells>>;
+  /** Modified cells ref — read via .current to avoid re-render cascades */
+  modifiedCellsRef: MutableRefObject<ModifiedCells>;
 
   /** Value formatter for display */
   formatter?: (value: CellValue) => string;
@@ -64,8 +61,7 @@ export function EditableCell<TData extends RowData>({
   column,
   onEdit,
   table,
-  modifiedCells,
-  setModifiedCells,
+  modifiedCellsRef,
   formatter,
   dataType = 'string',
 }: EditableCellProps<TData>) {
@@ -100,7 +96,8 @@ export function EditableCell<TData extends RowData>({
     [dataType]
   );
 
-  // Check if cell is modified - accounts for stale modifiedCells from column closures
+  // Check if cell is modified — reads from ref to avoid stale closures
+  const modifiedCells = modifiedCellsRef.current;
   const modifiedValue = modifiedCells[rowId]?.[columnId];
   const hasModifiedEntry = modifiedValue !== undefined;
 
@@ -130,11 +127,11 @@ export function EditableCell<TData extends RowData>({
     // Check for dynamic options function
     const getDynamicOptions = meta?.getDynamicSelectOptions;
     if (getDynamicOptions && typeof getDynamicOptions === 'function') {
-      return getDynamicOptions(rowId, modifiedCells);
+      return getDynamicOptions(rowId, modifiedCellsRef.current);
     }
 
     return meta?.selectOptions || [];
-  }, [cellTypes.isSelectColumn, meta, rowId, modifiedCells]);
+  }, [cellTypes.isSelectColumn, meta, rowId, modifiedCellsRef]);
 
   // Safe value helper
   const safeValue = useCallback(
@@ -226,18 +223,16 @@ export function EditableCell<TData extends RowData>({
       const processedValue = processValue(newValue);
 
       // Store the saved value locally so we can display it immediately,
-      // even before modifiedCells prop catches up from the parent
+      // even before modifiedCellsRef.current catches up from the parent
       hasSavedValueRef.current = true;
       savedValueRef.current = processedValue;
 
+      // onEdit (useCellEdit) handles both data update and modifiedCells update —
+      // no need to call setModifiedCells separately (H3 fix: was a double update)
       onEdit(rowId, columnId, processedValue);
-      setModifiedCells((prev) => ({
-        ...prev,
-        [rowId]: { ...prev[rowId], [columnId]: processedValue },
-      }));
       setEditValue(processedValue as string | number);
     },
-    [processValue, onEdit, rowId, columnId, setModifiedCells]
+    [processValue, onEdit, rowId, columnId]
   );
 
   // Reset editing state
@@ -267,7 +262,7 @@ export function EditableCell<TData extends RowData>({
       if (meta?.onSelect) {
         const currentRowData = {
           ...row.original,
-          ...modifiedCells[rowId],
+          ...modifiedCellsRef.current[rowId],
           [columnId]: newValue,
         };
         meta.onSelect(newValue, rowId, currentRowData as TData);
@@ -280,7 +275,7 @@ export function EditableCell<TData extends RowData>({
       updateCellValue,
       meta,
       row.original,
-      modifiedCells,
+      modifiedCellsRef,
       rowId,
       columnId,
       resetState,

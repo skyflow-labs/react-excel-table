@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, forwardRef, createContext, useContext } from 'react';
+import { useRef, useMemo, useEffect, forwardRef, createContext, useContext, memo } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { flexRender, type Table, type Row } from '@tanstack/react-table';
@@ -59,8 +59,9 @@ InnerElement.displayName = 'InnerElement';
 
 /**
  * Row component for virtualization.
+ * Wrapped in React.memo to skip re-renders when props are unchanged.
  */
-function TableRow({
+const TableRow = memo(function TableRow({
   row,
   style,
   isLinked,
@@ -107,7 +108,7 @@ function TableRow({
       })}
     </div>
   );
-}
+});
 
 /**
  * Item data passed through react-window's itemData prop.
@@ -181,13 +182,24 @@ export function TableBody<TData extends RowData>({
     [rows, isLinkedRow, isReadOnlyRow, dataVersion, columnWidthOverrides, totalRowWidth]
   );
 
-  // Forward horizontal scroll events to parent for header sync
+  // Forward horizontal scroll events to parent for header sync.
+  // Throttled to one update per animation frame to avoid layout thrashing.
   useEffect(() => {
     const el = outerRef.current;
     if (!el || !onHorizontalScroll) return;
-    const handleScroll = () => onHorizontalScroll(el.scrollLeft);
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
+    let rafId = 0;
+    const handleScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        onHorizontalScroll(el.scrollLeft);
+        rafId = 0;
+      });
+    };
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [onHorizontalScroll]);
 
   if (rows.length === 0) {
@@ -204,7 +216,6 @@ export function TableBody<TData extends RowData>({
         <AutoSizer>
           {({ height, width }) => (
             <List
-              key={dataVersion}
               ref={listRef}
               outerRef={outerRef}
               height={height}

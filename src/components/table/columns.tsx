@@ -1,3 +1,4 @@
+import { type MutableRefObject } from 'react';
 import { type ColumnDef, type Row, type Table, type Column } from '@tanstack/react-table';
 import type {
   RowData,
@@ -11,7 +12,6 @@ import { EditableCell } from '@/components/cell/EditableCell';
 import { ReadOnlyCell } from '@/components/cell/ReadOnlyCell';
 import { formatDateValue } from '@/utils/formatters/date';
 import { formatCurrency } from '@/utils/formatters/currency';
-import { calculateOptimalColumnWidthPrecise } from '@/utils/autosize/calculator';
 
 /**
  * Safe getter for row values
@@ -79,11 +79,8 @@ export interface BuildColumnOptions<TData extends RowData> {
   /** Table instance */
   table: Table<TData>;
 
-  /** Modified cells record */
-  modifiedCells: ModifiedCells;
-
-  /** Modified cells setter */
-  setModifiedCells: React.Dispatch<React.SetStateAction<ModifiedCells>>;
+  /** Modified cells ref (read via .current to avoid column rebuild on every edit) */
+  modifiedCellsRef: MutableRefObject<ModifiedCells>;
 
   /** Column filter flags */
   columnFilters: Record<string, boolean>;
@@ -97,8 +94,8 @@ export interface BuildColumnOptions<TData extends RowData> {
   /** Expanded columns setter - accepts either a string column ID to toggle or a full state update */
   setExpandedColumns: ((columnId: string) => void) | React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 
-  /** Data array for autosize calculations */
-  data: TData[];
+  /** Data ref for autosize calculations (read via .current to avoid column rebuild) */
+  dataRef: MutableRefObject<TData[]>;
 
   /** Check if row is read-only */
   isReadOnlyRow?: (row: TData) => boolean;
@@ -130,21 +127,10 @@ export function buildColumn<TData extends RowData>(
   const key = accessorKey as string;
   const isExpanded = options.expandedColumns[key] ?? false;
 
-  // Calculate column size — when expanded, use precise canvas measurement
-  // to find the minimum width that shows all content without truncation.
-  const computedSize = autosize
-    ? isExpanded
-      ? calculateOptimalColumnWidthPrecise(
-          options.data,
-          accessorKey,
-          header,
-          dataType as CellDataType,
-          dateFormat,
-          minWidth,
-          maxWidth
-        )
-      : minWidth
-    : size;
+  // Column size: autosize widths are computed once in useExcelTable's
+  // columnWidthOverrides memo and applied via inline styles in TableHeader/TableBody.
+  // Here we just set the base size — minWidth for autosize cols, configured size otherwise.
+  const computedSize = autosize ? minWidth : size;
 
   // Determine filter function
   const filterFn = searchable
@@ -201,8 +187,7 @@ export function buildColumn<TData extends RowData>(
           column={column as Column<TData, unknown>}
           onEdit={options.handleCellEdit}
           table={options.table}
-          modifiedCells={options.modifiedCells}
-          setModifiedCells={options.setModifiedCells}
+          modifiedCellsRef={options.modifiedCellsRef}
           dataType={dataType as CellDataType}
           formatter={formatter}
         />

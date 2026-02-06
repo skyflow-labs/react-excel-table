@@ -67,6 +67,13 @@ export function useExcelTable<TData extends RowData>({
   const [columnFilterFlags, setColumnFilterFlags] = useState<Record<string, boolean>>({});
   const [expandedColumns, setExpandedColumns] = useState<Record<string, boolean>>({});
 
+  // Refs for values accessed in column render closures — avoids rebuilding
+  // all column definitions (and thus all cell render functions) on every edit
+  const modifiedCellsRef = useRef<ModifiedCells>(modifiedCells);
+  modifiedCellsRef.current = modifiedCells;
+  const internalDataRef = useRef<TData[]>(internalData);
+  internalDataRef.current = internalData;
+
   // Ref to hold the table instance, used to break the circular dependency:
   // buildColumns needs `table` (for cell navigation), but useReactTable needs `columns`.
   // On the first render, tableRef.current is null — headers still render correctly
@@ -112,29 +119,25 @@ export function useExcelTable<TData extends RowData>({
         columns: columnConfigs,
         handleCellEdit,
         table: tableRef.current,
-        modifiedCells,
-        setModifiedCells,
+        modifiedCellsRef,
         editMode,
         columnFilters: columnFilterFlags,
         setColumnFilters: setColumnFilterFlag,
         expandedColumns,
         setExpandedColumns: handleColumnExpansionToggle,
-        data: internalData,
+        dataRef: internalDataRef,
         isReadOnlyRow,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- tableReady triggers rebuild after tableRef is set
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tableReady triggers rebuild after tableRef is set; modifiedCells/internalData accessed via refs to avoid re-creating all cell closures on every edit
     [
       tableReady,
       columnConfigs,
       handleCellEdit,
-      modifiedCells,
-      setModifiedCells,
       editMode,
       columnFilterFlags,
       setColumnFilterFlag,
       expandedColumns,
       handleColumnExpansionToggle,
-      internalData,
       isReadOnlyRow,
     ]
   );

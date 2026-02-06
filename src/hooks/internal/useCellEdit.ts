@@ -100,18 +100,16 @@ export function useCellEdit<TData extends RowData>({
         updates[commonCategoryField] = processedValue;
       }
 
-      // Update data array if provided
+      // Update data array if provided — use findIndex+slice to avoid
+      // iterating past the matched row (O(index) vs O(N))
       if (setData) {
-        setData((prev: TData[]) =>
-          prev.map((row) =>
-            row.id === rowId
-              ? {
-                  ...row,
-                  ...updates,
-                }
-              : row
-          )
-        );
+        setData((prev: TData[]) => {
+          const idx = prev.findIndex((row) => row.id === rowId);
+          if (idx === -1) return prev;
+          const next = prev.slice();
+          next[idx] = { ...prev[idx], ...updates };
+          return next;
+        });
       }
 
       // Update modified cells tracking

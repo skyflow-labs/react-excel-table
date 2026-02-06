@@ -63,6 +63,32 @@ function estimateTextWidth(text: string, config: AutosizeConfig = DEFAULT_AUTOSI
   return text.length * config.charWidthEstimate;
 }
 
+/** Cached canvas context — avoids creating a new canvas element per call */
+let cachedContext: CanvasRenderingContext2D | null = null;
+let cachedFont = '';
+
+function getCanvasContext(font: string): CanvasRenderingContext2D | null {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return null;
+  }
+
+  if (!cachedContext) {
+    try {
+      const canvas = document.createElement('canvas');
+      cachedContext = canvas.getContext('2d');
+    } catch {
+      return null;
+    }
+  }
+
+  if (cachedContext && font !== cachedFont) {
+    cachedContext.font = font;
+    cachedFont = font;
+  }
+
+  return cachedContext;
+}
+
 /**
  * Measure text width using canvas (precise)
  * Falls back to estimation in SSR environments
@@ -71,22 +97,13 @@ export function measureTextWidth(
   text: string,
   font: string = DEFAULT_AUTOSIZE_CONFIG.defaultFont
 ): number {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  const context = getCanvasContext(font);
+  if (!context) {
     return estimateTextWidth(text);
   }
 
   try {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return estimateTextWidth(text);
-    }
-
-    context.font = font;
-    const measurement = context.measureText(text);
-
-    return Math.ceil(measurement.width);
+    return Math.ceil(context.measureText(text).width);
   } catch {
     return estimateTextWidth(text);
   }
