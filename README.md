@@ -318,7 +318,7 @@ function App() {
 
 ## Import Plugin
 
-Import CSV/Excel files with automatic security sanitization.
+Import CSV/XLSX files with automatic security sanitization.
 
 ```bash
 npm install papaparse
@@ -365,10 +365,10 @@ useSheetImport({
 
 ## Export Plugin
 
-Export to Excel or CSV with formula injection protection.
+Export to XLSX or CSV with formula injection protection.
 
 ```bash
-npm install exceljs  # For Excel export
+npm install exceljs  # For .xlsx export
 ```
 
 ```tsx

@@ -10,7 +10,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in `react-excel-table`, please report it responsibly.
+If you discover a security vulnerability in `react-sheet-table`, please report it responsibly.
 
 **Do NOT open a public issue for security vulnerabilities.**
 
@@ -33,7 +33,7 @@ Instead, please email **security@skyflowlabs.com** with:
 The following are in scope:
 
 - XSS vulnerabilities in data sanitization
-- Formula injection in Excel/CSV exports
+- Formula injection in spreadsheet/CSV exports
 - Prototype pollution or injection attacks
 - Dependencies with known CVEs
 
@@ -48,7 +48,7 @@ The following are out of scope:
 This library includes built-in security features:
 
 - **XSS sanitization** — HTML tag stripping, event handler detection, null byte removal
-- **Formula injection prevention** — Neutralizes dangerous prefixes in Excel/CSV exports
+- **Formula injection prevention** — Neutralizes dangerous prefixes in spreadsheet/CSV exports
 - **Input validation** — File type, size, and content validation for imports
 - **Path traversal protection** — Suspicious filename detection
 

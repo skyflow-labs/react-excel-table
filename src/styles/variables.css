@@ -177,7 +177,7 @@
 
 /**
  * Compact table variant
- * Usage: <SheetTable className="excel-table--compact" />
+ * Usage: <SheetTable className="sheet-table--compact" />
  */
 .sheet-table--compact {
   --sheet-row-height: 32px;
@@ -189,7 +189,7 @@
 
 /**
  * Comfortable (spacious) table variant
- * Usage: <SheetTable className="excel-table--comfortable" />
+ * Usage: <SheetTable className="sheet-table--comfortable" />
  */
 .sheet-table--comfortable {
   --sheet-row-height: 48px;
@@ -201,7 +201,7 @@
 
 /**
  * Bordered table variant
- * Usage: <SheetTable className="excel-table--bordered" />
+ * Usage: <SheetTable className="sheet-table--bordered" />
  */
 .sheet-table--bordered .sheet-table-cell {
   border: 1px solid var(--sheet-border-color);
@@ -209,7 +209,7 @@
 
 /**
  * Striped rows
- * Usage: <SheetTable className="excel-table--striped" />
+ * Usage: <SheetTable className="sheet-table--striped" />
  */
 .sheet-table--striped .sheet-table-row:nth-child(even) {
   background-color: var(--sheet-gray-50);
@@ -217,7 +217,7 @@
 
 /**
  * No borders variant
- * Usage: <SheetTable className="excel-table--borderless" />
+ * Usage: <SheetTable className="sheet-table--borderless" />
  */
 .sheet-table--borderless {
   --sheet-border-color: transparent;
@@ -230,7 +230,7 @@
 
 /**
  * Blue theme
- * Usage: <SheetTable className="excel-theme--blue" />
+ * Usage: <SheetTable className="sheet-theme--blue" />
  */
 .sheet-theme--blue {
   --sheet-primary: #2563eb;
@@ -241,7 +241,7 @@
 
 /**
  * Purple theme
- * Usage: <SheetTable className="excel-theme--purple" />
+ * Usage: <SheetTable className="sheet-theme--purple" />
  */
 .sheet-theme--purple {
   --sheet-primary: #7c3aed;
@@ -252,7 +252,7 @@
 
 /**
  * Orange theme
- * Usage: <SheetTable className="excel-theme--orange" />
+ * Usage: <SheetTable className="sheet-theme--orange" />
  */
 .sheet-theme--orange {
   --sheet-primary: #ea580c;
@@ -263,7 +263,7 @@
 
 /**
  * Rose theme
- * Usage: <SheetTable className="excel-theme--rose" />
+ * Usage: <SheetTable className="sheet-theme--rose" />
  */
 .sheet-theme--rose {
   --sheet-primary: #e11d48;

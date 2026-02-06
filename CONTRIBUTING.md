@@ -1,4 +1,4 @@
-# Contributing to react-excel-table
+# Contributing to react-sheet-table
 
 Thanks for your interest in making this library better! Every contribution helps.
 
@@ -52,8 +52,8 @@ Found something confusing in the docs? PRs welcome for:
 ## Development Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/react-excel-table.git
-cd react-excel-table
+git clone https://github.com/YOUR_USERNAME/react-sheet-table.git
+cd react-sheet-table
 npm install
 npm test        # Run tests
 npm run build   # Build library

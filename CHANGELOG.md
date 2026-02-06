@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of skyflowlabs-excel
-- `ExcelTable` component with editable cells
+- Initial release of react-sheet-table
+- `SheetTable` component with editable cells
 - Support for multiple cell types: text, number, currency, date, select, boolean
 - Full keyboard navigation (Arrow keys, Tab, Enter, Escape)
 - Virtualized rendering with react-window for large datasets
 - Column auto-sizing based on content
 - Row selection and bulk operations
-- Excel import plugin (CSV support via papaparse)
-- Excel export plugin (xlsx support via exceljs)
+- Spreadsheet import plugin (CSV support via papaparse)
+- Spreadsheet export plugin (.xlsx support via exceljs)
 - CSS variables for easy theming
 - Full TypeScript support
 - Comprehensive test coverage
@@ -33,12 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Hooks
 
-- `useExcelTable` - Main table logic hook
+- `useSheetTable` - Main table logic hook
 - `useKeyboardNavigation` - Keyboard navigation handling
 - `useAutosize` - Column width calculation
 - `useCellEdit` - Cell editing logic
 
 ### Plugins
 
-- `excel-import` - Import CSV files
-- `excel-export` - Export to Excel format
+- `sheet-import` - Import CSV files
+- `sheet-export` - Export to .xlsx format
