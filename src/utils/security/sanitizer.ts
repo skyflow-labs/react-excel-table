@@ -146,11 +146,15 @@ export function sanitizeCellValue(
       } while (sanitized !== prev);
     }
 
-    // Sanitize for XSS (run after stripping to catch any residual patterns)
+    // Sanitize for XSS iteratively (handles nested bypass attempts like oonnclick==click=)
     if (config.sanitizeText) {
-      for (const pattern of XSS_PATTERNS) {
-        sanitized = sanitized.replace(pattern, '');
-      }
+      let prev: string;
+      do {
+        prev = sanitized;
+        for (const pattern of XSS_PATTERNS) {
+          sanitized = sanitized.replace(pattern, '');
+        }
+      } while (sanitized !== prev);
     }
 
     // Block formula injection
@@ -216,9 +220,11 @@ export function sanitizeRow<T extends Record<string, unknown>>(
   row: T,
   config: ImportSecurityConfig
 ): T {
-  const sanitized: Record<string, unknown> = {};
+  const sanitized = Object.create(null) as Record<string, unknown>;
 
   for (const [key, value] of Object.entries(row)) {
+    // Skip prototype pollution vectors
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     sanitized[key] = sanitizeCellValue(value, config, key);
   }
 
@@ -313,7 +319,7 @@ export function sanitizeImportData<T extends Record<string, unknown>>(
           result.stats.formulasBlocked++;
         }
         if (originalValue.length !== sanitized.length) {
-          if (HTML_TAG_PATTERN.test(originalValue)) {
+          if (/<[^>]*>/.test(originalValue)) {
             result.stats.htmlStripped++;
           }
           if (sanitized.length === config.maxCellLength) {

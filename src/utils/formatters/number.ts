@@ -195,6 +195,8 @@ export function formatPercent(
  */
 export function formatBytes(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return '0 Bytes';
+  if (bytes < 0) return '-' + formatBytes(-bytes, decimals);
+  if (!Number.isFinite(bytes)) return String(bytes);
 
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];

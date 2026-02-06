@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Table, RowData, ModifiedCells, NotificationAdapter } from '@/types';
 import { consoleNotificationAdapter } from '@/types/plugins';
 
@@ -105,6 +105,7 @@ export function useTableActions<TData extends RowData>({
   notifications = consoleNotificationAdapter,
 }: UseTableActionsProps<TData>): UseTableActionsReturn<TData> {
   const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<string[]>([]);
@@ -120,8 +121,9 @@ export function useTableActions<TData extends RowData>({
     try {
       const result = await onDelete(rowsToDelete);
 
-      // Update local data
-      setData((prev) => prev.filter((row) => !rowsToDelete.includes(row.id)));
+      // Update local data (use Set for O(N+M) instead of O(N*M))
+      const deleteSet = new Set(rowsToDelete);
+      setData((prev) => prev.filter((row) => !deleteSet.has(row.id)));
 
       // Reset table selection
       table.resetRowSelection();
@@ -151,8 +153,9 @@ export function useTableActions<TData extends RowData>({
    * Handle save changes
    */
   const handleSaveChanges = useCallback(async (): Promise<TData[]> => {
-    if (!onSave || isSaving) return [];
+    if (!onSave || isSavingRef.current) return [];
 
+    isSavingRef.current = true;
     setIsSaving(true);
 
     try {
@@ -188,9 +191,10 @@ export function useTableActions<TData extends RowData>({
       notifications.error('Error saving changes');
       return [];
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [data, onSave, isSaving, setData, modifiedCells, setModifiedCells, onDataChange, notifications]);
+  }, [data, onSave, setData, modifiedCells, setModifiedCells, onDataChange, notifications]);
 
   /**
    * Toggle fullscreen mode
