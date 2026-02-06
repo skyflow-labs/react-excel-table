@@ -291,7 +291,11 @@ export function buildColumns<TData extends RowData>(
           <input
             type="checkbox"
             checked={table.getIsAllRowsSelected()}
+            ref={(el) => {
+              if (el) el.indeterminate = table.getIsSomeRowsSelected();
+            }}
             onChange={table.getToggleAllRowsSelectedHandler()}
+            aria-label="Select all rows"
             className="cursor-pointer w-4 h-4"
           />
         </div>
@@ -302,6 +306,7 @@ export function buildColumns<TData extends RowData>(
             type="checkbox"
             checked={row.getIsSelected()}
             onChange={row.getToggleSelectedHandler()}
+            aria-label={`Select row ${row.index + 1}`}
             className="cursor-pointer w-4 h-4"
           />
         </div>

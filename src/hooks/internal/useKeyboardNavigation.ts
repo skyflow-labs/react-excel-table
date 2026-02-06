@@ -48,9 +48,13 @@ export function useKeyboardNavigation({
         toggleFullscreen();
       }
 
-      // Escape: Exit fullscreen
+      // Escape: Exit fullscreen — but only if focus is not in a form control
+      // (otherwise it conflicts with cell editing Escape to cancel)
       if (event.key === 'Escape' && isFullscreen) {
-        toggleFullscreen();
+        const tag = (event.target as HTMLElement).tagName;
+        if (tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+          toggleFullscreen();
+        }
       }
     };
 

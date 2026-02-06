@@ -382,6 +382,13 @@ export function EditableCell<TData extends RowData>({
           e.preventDefault();
           setEditValue(getInitialValue());
           resetState();
+          // H3: Restore focus to the display cell so keyboard-only users keep their position
+          requestAnimationFrame(() => {
+            const displayCell = document.querySelector(
+              `[data-row="${rowIndex}"][data-col="${columnIndex}"]`
+            ) as HTMLElement;
+            displayCell?.focus();
+          });
           break;
       }
     },
@@ -412,7 +419,7 @@ export function EditableCell<TData extends RowData>({
   const handleInputChange = useCallback(
     (newValue: string) => {
       if (cellTypes.isCurrencyColumn || cellTypes.isNumberColumn) {
-        const cleanValue = newValue.replace(/[^0-9.]/g, '');
+        const cleanValue = newValue.replace(/[^0-9.\-]/g, '');
         setEditValue(cleanValue);
         setSearchTerm(cleanValue);
       } else {

@@ -100,34 +100,53 @@ export function ExcelTable<TData extends RowData>({
     onModifiedCellsChange?.(modifiedCells);
   }, [modifiedCells, onModifiedCellsChange]);
 
+  // Save error state — surfaced in TableControls (H5)
+  const [saveError, setSaveError] = useState<string | undefined>();
+
+  const handleSaveWithErrorCapture = useCallback(async () => {
+    setSaveError(undefined);
+    try {
+      await handleSaveChanges();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An error occurred while saving.';
+      setSaveError(message);
+    }
+  }, [handleSaveChanges]);
+
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<string[]>([]);
+  const [deleteError, setDeleteError] = useState<string | undefined>();
 
-  const handleShowDeleteModal = () => {
+  const handleShowDeleteModal = useCallback(() => {
     const selectedIds = table.getSelectedRowModel().rows.map((r) => r.original.id);
     setRowsToDelete(selectedIds);
+    setDeleteError(undefined);
     setShowDeleteModal(true);
-  };
+  }, [table]);
 
-  const handleDeleteConfirmed = async () => {
+  const handleDeleteConfirmed = useCallback(async () => {
     if (!onDelete || rowsToDelete.length === 0) return;
 
+    setDeleteError(undefined);
     try {
       await onDelete(rowsToDelete);
       table.resetRowSelection();
       setRowsToDelete([]);
       setShowDeleteModal(false);
     } catch (error) {
-      console.error('Delete error:', error);
+      // H6: Surface delete errors to the user instead of silently swallowing
+      const message = error instanceof Error ? error.message : 'An error occurred while deleting rows.';
+      setDeleteError(message);
     }
-  };
+  }, [onDelete, rowsToDelete, table]);
 
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center h-64" role="status" aria-label="Loading table data">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true" />
+        <span className="sr-only">Loading table data</span>
       </div>
     );
   }
@@ -137,11 +156,12 @@ export function ExcelTable<TData extends RowData>({
       <TableControls
         editedCellsCount={editedCells.length}
         onDiscard={handleDiscardChanges}
-        onSave={handleSaveChanges}
+        onSave={handleSaveWithErrorCapture}
         isSaving={isSaving}
+        saveError={saveError}
       />
 
-      <div className="flex-1 flex flex-col border border-gray-300 rounded-lg overflow-hidden min-h-0">
+      <div role="grid" className="flex-1 flex flex-col border border-gray-300 rounded-lg overflow-hidden min-h-0">
         <TableHeader
           table={table}
           columnWidthOverrides={columnWidthOverrides}
@@ -184,7 +204,7 @@ export function ExcelTable<TData extends RowData>({
             hover:bg-red-700 transition-colors
           "
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M3 6h18" />
             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
@@ -195,10 +215,11 @@ export function ExcelTable<TData extends RowData>({
 
       <DeleteModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => { setShowDeleteModal(false); setDeleteError(undefined); }}
         onConfirm={handleDeleteConfirmed}
         isSaving={isSaving}
         count={rowsToDelete.length}
+        error={deleteError}
       />
     </>
   );

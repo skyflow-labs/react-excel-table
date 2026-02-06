@@ -1,3 +1,5 @@
+import { useEffect, useRef, useCallback } from 'react';
+
 export interface DeleteModalProps {
   /** Whether the modal is open */
   isOpen: boolean;
@@ -19,10 +21,13 @@ export interface DeleteModalProps {
 
   /** Custom description */
   description?: string;
+
+  /** Error message to display */
+  error?: string;
 }
 
 /**
- * Delete confirmation modal
+ * Delete confirmation modal with proper dialog semantics
  */
 export function DeleteModal({
   isOpen,
@@ -32,29 +37,68 @@ export function DeleteModal({
   count,
   title = 'Delete Rows',
   description,
+  error,
 }: DeleteModalProps) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const titleId = 'delete-modal-title';
+  const descId = 'delete-modal-desc';
+
+  // Auto-focus Cancel button on open
+  useEffect(() => {
+    if (isOpen) {
+      // Wait a tick for the DOM to render
+      requestAnimationFrame(() => cancelRef.current?.focus());
+    }
+  }, [isOpen]);
+
+  // Handle Escape key to close (but not during saving)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSaving) {
+        e.stopPropagation();
+        onClose();
+      }
+    },
+    [isSaving, onClose]
+  );
+
   if (!isOpen) return null;
 
   const defaultDescription = `Are you sure you want to delete ${count} row${count !== 1 ? 's' : ''}? This action cannot be undone.`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={descId}
+      onKeyDown={handleKeyDown}
+    >
+      {/* Backdrop — disabled during saving to prevent inconsistent state */}
       <div
         className="absolute inset-0 bg-black/50"
-        onClick={onClose}
+        onClick={isSaving ? undefined : onClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">{title}</h2>
+        <h2 id={titleId} className="text-lg font-semibold text-gray-900 mb-2">{title}</h2>
 
-        <p className="text-gray-600 mb-6">
+        <p id={descId} className="text-gray-600 mb-4">
           {description || defaultDescription}
         </p>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700" role="alert">
+            {error}
+          </div>
+        )}
+
         <div className="flex justify-end gap-3">
           <button
+            ref={cancelRef}
             type="button"
             onClick={onClose}
             disabled={isSaving}
@@ -84,6 +128,7 @@ export function DeleteModal({
               <>
                 <svg
                   className="animate-spin h-4 w-4"
+                  aria-hidden="true"
                   viewBox="0 0 24 24"
                   fill="none"
                 >

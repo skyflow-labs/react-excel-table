@@ -80,6 +80,7 @@ function TableRow({
 
   return (
     <div
+      role="row"
       style={rowStyle}
       className={`
         flex border-b border-gray-200
@@ -93,6 +94,7 @@ function TableRow({
         return (
           <div
             key={cell.id}
+            role="gridcell"
             style={{
               width: overrideWidth ?? cell.column.getSize(),
               minWidth: cell.column.columnDef.minSize,
@@ -204,7 +206,6 @@ export function TableBody<TData extends RowData>({
         <AutoSizer>
           {({ height, width }) => (
             <List
-              key={dataVersion}
               ref={listRef}
               outerRef={outerRef}
               height={height}

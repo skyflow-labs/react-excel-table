@@ -46,7 +46,7 @@ export interface SelectCellProps {
 }
 
 /**
- * Select/dropdown cell component with search
+ * Select/dropdown cell component with search and keyboard navigation
  */
 export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
   (
@@ -70,6 +70,7 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
   ) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(true);
+    const [activeIndex, setActiveIndex] = useState(-1);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +81,18 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
         opt.label.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }, [options, searchTerm]);
+
+    // Reset active index when filtered options change
+    useEffect(() => {
+      setActiveIndex(-1);
+    }, [filteredOptions.length]);
+
+    // Scroll active option into view
+    useEffect(() => {
+      if (activeIndex < 0 || !dropdownRef.current) return;
+      const items = dropdownRef.current.querySelectorAll('[data-option-index]');
+      items[activeIndex]?.scrollIntoView({ block: 'nearest' });
+    }, [activeIndex]);
 
     // Handle click outside
     useEffect(() => {
@@ -106,15 +119,72 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && filteredOptions.length > 0) {
-        const firstEnabled = filteredOptions.find((opt) => !opt.disabled);
-        if (firstEnabled) {
+      if (!isOpen) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
-          handleSelect(firstEnabled.value);
+          setIsOpen(true);
+          return;
         }
-      } else if (e.key === 'Escape') {
-        setIsOpen(false);
-        onBlur?.();
+      }
+
+      const enabledOptions = filteredOptions.filter((opt) => !opt.disabled);
+
+      switch (e.key) {
+        case 'ArrowDown': {
+          e.preventDefault();
+          if (enabledOptions.length === 0) break;
+          const nextIdx = activeIndex < filteredOptions.length - 1 ? activeIndex + 1 : 0;
+          let i = nextIdx;
+          for (let n = 0; n < filteredOptions.length; n++) {
+            const idx = (nextIdx + n) % filteredOptions.length;
+            if (!filteredOptions[idx].disabled) {
+              i = idx;
+              break;
+            }
+          }
+          setActiveIndex(i);
+          break;
+        }
+        case 'ArrowUp': {
+          e.preventDefault();
+          if (enabledOptions.length === 0) break;
+          const prevIdx = activeIndex > 0 ? activeIndex - 1 : filteredOptions.length - 1;
+          let i = prevIdx;
+          for (let n = 0; n < filteredOptions.length; n++) {
+            const idx = (prevIdx - n + filteredOptions.length) % filteredOptions.length;
+            if (!filteredOptions[idx].disabled) {
+              i = idx;
+              break;
+            }
+          }
+          setActiveIndex(i);
+          break;
+        }
+        case 'Enter': {
+          e.preventDefault();
+          if (activeIndex >= 0 && activeIndex < filteredOptions.length) {
+            const opt = filteredOptions[activeIndex];
+            if (!opt.disabled) {
+              handleSelect(opt.value);
+              return;
+            }
+          }
+          if (searchTerm.trim() && enabledOptions.length > 0) {
+            handleSelect(enabledOptions[0].value);
+            return;
+          }
+          // M7: Empty search + no highlight → close without changing value
+          if (!searchTerm.trim()) {
+            setIsOpen(false);
+            onBlur?.();
+            return;
+          }
+          break;
+        }
+        case 'Escape':
+          setIsOpen(false);
+          onBlur?.();
+          break;
       }
 
       onKeyDown?.(e);
@@ -134,11 +204,16 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setIsOpen(true);
+            setActiveIndex(-1);
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoFocus={autoFocus}
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-autocomplete="list"
+          aria-activedescendant={activeIndex >= 0 ? `select-option-${activeIndex}` : undefined}
           className={`
             w-full h-[36px] px-2 border border-gray-300 rounded
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -151,17 +226,25 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
         {isOpen && (
           <div
             ref={dropdownRef}
+            role="listbox"
             className="absolute z-10 mt-1 w-full border border-gray-300 bg-white rounded shadow-lg max-h-48 overflow-y-auto"
           >
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((opt) => (
+              filteredOptions.map((opt, index) => (
                 <div
                   key={opt.value}
+                  id={`select-option-${index}`}
+                  data-option-index={index}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  aria-disabled={opt.disabled || undefined}
                   className={`
                     flex items-center justify-between px-2 py-1.5 group
                     ${opt.disabled
                       ? 'cursor-not-allowed text-gray-400 bg-gray-50'
-                      : 'hover:bg-gray-100 cursor-pointer'
+                      : index === activeIndex
+                        ? 'bg-blue-100 cursor-pointer'
+                        : 'hover:bg-gray-100 cursor-pointer'
                     }
                   `}
                 >
@@ -173,6 +256,9 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
                         handleSelect(opt.value);
                       }
                     }}
+                    onMouseEnter={() => {
+                      if (!opt.disabled) setActiveIndex(index);
+                    }}
                   >
                     {opt.label}
                   </div>
@@ -183,6 +269,7 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
                       className="opacity-0 group-hover:opacity-100 p-1 text-red-600 hover:bg-red-100 rounded transition-opacity"
                       onMouseDown={(e) => handleDeleteClick(opt, e)}
                       title="Delete"
+                      aria-label={`Delete ${opt.label}`}
                     >
                       <svg
                         width="14"
@@ -191,6 +278,7 @@ export const SelectCell = forwardRef<HTMLInputElement, SelectCellProps>(
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
+                        aria-hidden="true"
                       >
                         <path d="M3 6h18" />
                         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />

@@ -50,8 +50,13 @@ export const CurrencyCell = forwardRef<HTMLInputElement, CurrencyCellProps>(
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
 
-      // Allow only numbers and decimal point
-      const cleanValue = inputValue.replace(/[^0-9.]/g, '');
+      // Allow numbers, decimal point, and leading minus sign
+      let cleanValue = inputValue.replace(/[^0-9.\-]/g, '');
+
+      // Ensure minus sign is only at the beginning
+      if (cleanValue.indexOf('-') > 0) {
+        cleanValue = cleanValue.replace(/-/g, '');
+      }
 
       // Prevent multiple decimal points
       const parts = cleanValue.split('.');

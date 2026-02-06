@@ -37,6 +37,7 @@ export function TableHeader<TData extends RowData>({
       {table.getHeaderGroups().map((headerGroup) => (
         <div
           key={headerGroup.id}
+          role="row"
           className="flex"
           style={totalRowWidth > 0 ? { minWidth: totalRowWidth } : undefined}
         >
@@ -45,6 +46,7 @@ export function TableHeader<TData extends RowData>({
             return (
               <div
                 key={header.id}
+                role="columnheader"
                 style={{
                   width: overrideWidth ?? header.getSize(),
                   minWidth: header.column.columnDef.minSize,

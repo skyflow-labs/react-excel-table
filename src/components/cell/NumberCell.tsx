@@ -50,9 +50,14 @@ export const NumberCell = forwardRef<HTMLInputElement, NumberCellProps>(
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
 
-      // Allow only numbers and optionally decimals
-      const pattern = allowDecimals ? /[^0-9.]/g : /[^0-9]/g;
-      const cleanValue = inputValue.replace(pattern, '');
+      // Allow numbers, optionally decimals, and leading minus sign
+      const pattern = allowDecimals ? /[^0-9.\-]/g : /[^0-9\-]/g;
+      let cleanValue = inputValue.replace(pattern, '');
+
+      // Ensure minus sign is only at the beginning
+      if (cleanValue.indexOf('-') > 0) {
+        cleanValue = cleanValue.replace(/-/g, '');
+      }
 
       // Prevent multiple decimal points
       if (allowDecimals) {
