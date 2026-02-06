@@ -88,9 +88,9 @@ export interface ExportSecurityConfig {
 }
 
 /**
- * Full configuration for ExcelTable
+ * Full configuration for SheetTable
  */
-export interface ExcelTableConfig {
+export interface SheetTableConfig {
   /** Locale and formatting settings */
   locale: LocaleConfig;
 
@@ -163,7 +163,7 @@ export const DEFAULT_EXPORT_SECURITY: ExportSecurityConfig = {
 /**
  * Default behavior settings
  */
-export const DEFAULT_BEHAVIOR: ExcelTableConfig['behavior'] = {
+export const DEFAULT_BEHAVIOR: SheetTableConfig['behavior'] = {
   autoSaveDelay: 0,
   confirmDiscard: true,
   keyboardNavigation: true,
@@ -175,7 +175,7 @@ export const DEFAULT_BEHAVIOR: ExcelTableConfig['behavior'] = {
 /**
  * Full default configuration
  */
-export const DEFAULT_CONFIG: ExcelTableConfig = {
+export const DEFAULT_CONFIG: SheetTableConfig = {
   locale: DEFAULT_LOCALE,
   importSecurity: DEFAULT_IMPORT_SECURITY,
   exportSecurity: DEFAULT_EXPORT_SECURITY,
@@ -183,14 +183,14 @@ export const DEFAULT_CONFIG: ExcelTableConfig = {
 };
 
 /**
- * Context for ExcelTable configuration
+ * Context for SheetTable configuration
  */
-const ExcelTableConfigContext = createContext<ExcelTableConfig>(DEFAULT_CONFIG);
+const SheetTableConfigContext = createContext<SheetTableConfig>(DEFAULT_CONFIG);
 
 /**
- * Props for ExcelTableProvider
+ * Props for SheetTableProvider
  */
-export interface ExcelTableProviderProps {
+export interface SheetTableProviderProps {
   children: ReactNode;
 
   /**
@@ -211,24 +211,24 @@ export interface ExcelTableProviderProps {
   /**
    * Behavior configuration - merged with defaults
    */
-  behavior?: Partial<ExcelTableConfig['behavior']>;
+  behavior?: Partial<SheetTableConfig['behavior']>;
 
   /**
    * Full config override (if provided, partial configs are ignored)
    */
-  config?: ExcelTableConfig;
+  config?: SheetTableConfig;
 }
 
 /**
- * Provider component for ExcelTable configuration
+ * Provider component for SheetTable configuration
  *
  * Wrap your application or a section of it with this provider to set
- * global configuration for all ExcelTable components within.
+ * global configuration for all SheetTable components within.
  *
  * @example
  * ```tsx
  * // Configure for Mexican locale with peso currency
- * <ExcelTableProvider
+ * <SheetTableProvider
  *   locale={{
  *     locale: 'es-MX',
  *     timezone: 'America/Mexico_City',
@@ -241,18 +241,18 @@ export interface ExcelTableProviderProps {
  *   }}
  * >
  *   <App />
- * </ExcelTableProvider>
+ * </SheetTableProvider>
  * ```
  */
-export function ExcelTableProvider({
+export function SheetTableProvider({
   children,
   locale,
   importSecurity,
   exportSecurity,
   behavior,
   config,
-}: ExcelTableProviderProps) {
-  const mergedConfig = useMemo<ExcelTableConfig>(() => {
+}: SheetTableProviderProps) {
+  const mergedConfig = useMemo<SheetTableConfig>(() => {
     if (config) {
       return config;
     }
@@ -266,34 +266,34 @@ export function ExcelTableProvider({
   }, [config, locale, importSecurity, exportSecurity, behavior]);
 
   return (
-    <ExcelTableConfigContext.Provider value={mergedConfig}>
+    <SheetTableConfigContext.Provider value={mergedConfig}>
       {children}
-    </ExcelTableConfigContext.Provider>
+    </SheetTableConfigContext.Provider>
   );
 }
 
 /**
- * Hook to access ExcelTable configuration
+ * Hook to access SheetTable configuration
  *
- * @returns Current ExcelTable configuration
+ * @returns Current SheetTable configuration
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const config = useExcelTableConfig();
+ *   const config = useSheetTableConfig();
  *   console.log(config.locale.currency); // 'MXN'
  * }
  * ```
  */
-export function useExcelTableConfig(): ExcelTableConfig {
-  return useContext(ExcelTableConfigContext);
+export function useSheetTableConfig(): SheetTableConfig {
+  return useContext(SheetTableConfigContext);
 }
 
 /**
  * Hook to access just the locale configuration
  */
 export function useLocaleConfig(): LocaleConfig {
-  const config = useContext(ExcelTableConfigContext);
+  const config = useContext(SheetTableConfigContext);
   return config.locale;
 }
 
@@ -301,7 +301,7 @@ export function useLocaleConfig(): LocaleConfig {
  * Hook to access import security configuration
  */
 export function useImportSecurityConfig(): ImportSecurityConfig {
-  const config = useContext(ExcelTableConfigContext);
+  const config = useContext(SheetTableConfigContext);
   return config.importSecurity;
 }
 
@@ -309,7 +309,7 @@ export function useImportSecurityConfig(): ImportSecurityConfig {
  * Hook to access export security configuration
  */
 export function useExportSecurityConfig(): ExportSecurityConfig {
-  const config = useContext(ExcelTableConfigContext);
+  const config = useContext(SheetTableConfigContext);
   return config.exportSecurity;
 }
 

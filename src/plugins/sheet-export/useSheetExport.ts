@@ -1,14 +1,14 @@
 import { useCallback, useState } from 'react';
-import type { RowData, ExcelExportOptions, ColumnConfig, CellValue } from '@/types';
+import type { RowData, SheetExportOptions, ColumnConfig, CellValue } from '@/types';
 import { formatDateValue } from '@/utils/formatters/date';
 import { formatCurrency } from '@/utils/formatters/currency';
 
 /**
- * Return value from useExcelExport hook
+ * Return value from useSheetExport hook
  */
-export interface UseExcelExportReturn {
-  /** Export data to Excel */
-  exportToExcel: () => Promise<void>;
+export interface UseSheetExportReturn {
+  /** Export data to .xlsx */
+  exportToXlsx: () => Promise<void>;
 
   /** Whether export is in progress */
   isExporting: boolean;
@@ -18,7 +18,7 @@ export interface UseExcelExportReturn {
 }
 
 /**
- * Hook for exporting data to Excel format
+ * Hook for exporting data to .xlsx format
  *
  * @param data - Data to export
  * @param options - Export configuration
@@ -26,24 +26,24 @@ export interface UseExcelExportReturn {
  *
  * @example
  * ```tsx
- * const { exportToExcel, isExporting } = useExcelExport(transactions, {
+ * const { exportToXlsx, isExporting } = useSheetExport(transactions, {
  *   filename: 'transactions',
  *   columns: columnConfigs,
  * });
  *
- * <button onClick={exportToExcel} disabled={isExporting}>
- *   {isExporting ? 'Exporting...' : 'Export to Excel'}
+ * <button onClick={exportToXlsx} disabled={isExporting}>
+ *   {isExporting ? 'Exporting...' : 'Export to .xlsx'}
  * </button>
  * ```
  */
-export function useExcelExport<TData extends RowData>(
+export function useSheetExport<TData extends RowData>(
   data: TData[],
-  options: ExcelExportOptions<TData> = {}
-): UseExcelExportReturn {
+  options: SheetExportOptions<TData> = {}
+): UseSheetExportReturn {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const exportToExcel = useCallback(async () => {
+  const exportToXlsx = useCallback(async () => {
     const {
       filename = 'export',
       sheetName = 'Sheet1',
@@ -113,7 +113,7 @@ export function useExcelExport<TData extends RowData>(
             formattedValue = formatDateValue(value as string, 'yyyy-MM-dd');
           }
 
-          // SECURITY: Prevent formula injection in Excel export
+          // SECURITY: Prevent formula injection in .xlsx export
           if (typeof formattedValue === 'string') {
             formattedValue = neutralizeFormulaInjection(formattedValue);
           }
@@ -201,7 +201,7 @@ export function useExcelExport<TData extends RowData>(
   }, [data, options]);
 
   return {
-    exportToExcel,
+    exportToXlsx,
     isExporting,
     error,
   };
@@ -214,7 +214,7 @@ const FORMULA_INJECTION_PATTERNS = /^[=+\-@\t\r]/;
 
 /**
  * Neutralize formula injection by prefixing dangerous strings
- * This prevents CSV injection attacks when files are opened in Excel/Sheets
+ * This prevents CSV injection attacks when files are opened in Microsoft Excel/Google Sheets
  */
 function neutralizeFormulaInjection(value: string): string {
   if (FORMULA_INJECTION_PATTERNS.test(value)) {
@@ -241,7 +241,7 @@ export interface CSVExportOptions<TData extends RowData> {
 }
 
 /**
- * Export data to CSV format (simpler alternative to Excel)
+ * Export data to CSV format (simpler alternative to .xlsx)
  *
  * @security By default, this function prevents CSV injection attacks by
  * prefixing values that start with =, +, -, @, tab, or carriage return

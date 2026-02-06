@@ -56,10 +56,10 @@ function getFileExtension(filename: string): string {
  * These patterns at the start of a cell can trigger code execution in spreadsheet apps
  */
 const FORMULA_INJECTION_PATTERNS = [
-  /^=/,      // Excel/Sheets formula
+  /^=/,      // Microsoft Excel/Google Sheets formula
   /^\+/,     // Can be interpreted as formula
   /^-(?![0-9.]+$)/, // Formula prefix, but not pure negative numbers like -100 or -.5
-  /^@/,      // DDE commands in Excel
+  /^@/,      // DDE commands in Microsoft Excel
   /^\|/,     // Pipe command execution
   /^%0A/,    // URL-encoded newline (can break out of cells)
 ];

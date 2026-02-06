@@ -5,9 +5,9 @@ import {
   parseBooleanValue,
   normalizeHeader,
   autoDetectColumnMapping,
-} from '@/plugins/excel-import/parsers';
+} from '@/plugins/sheet-import/parsers';
 
-describe('Excel Import Parsers', () => {
+describe('Spreadsheet Import Parsers', () => {
   describe('parseNumericValue', () => {
     it('parses plain number', () => {
       expect(parseNumericValue(123.45)).toBe(123.45);

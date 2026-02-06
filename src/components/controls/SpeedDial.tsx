@@ -128,7 +128,7 @@ export function SpeedDial({
           text-white transition-all duration-200
           ${isOpen
             ? 'bg-gray-600 hover:bg-gray-700 rotate-45'
-            : 'bg-[var(--excel-primary,#30867B)] hover:bg-[var(--excel-primary-hover,#2D9084)]'
+            : 'bg-[var(--sheet-primary,#30867B)] hover:bg-[var(--sheet-primary-hover,#2D9084)]'
           }
         `}
         title={isOpen ? 'Close menu' : 'Open menu'}

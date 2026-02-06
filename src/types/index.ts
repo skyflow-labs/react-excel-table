@@ -26,9 +26,9 @@ export type {
 export type {
   TableState,
   TableActions,
-  UseExcelTableReturn,
-  ExcelTableProps,
-  UseExcelTableProps,
+  UseSheetTableReturn,
+  SheetTableProps,
+  UseSheetTableProps,
   TableContextValue,
   Table,
   Row,
@@ -59,11 +59,11 @@ export type {
 
 // Plugin types
 export type {
-  ExcelImportOptions,
-  ExcelImportResult,
-  ExcelExportOptions,
-  ExcelCellStyle,
-  ExcelBorderStyle,
+  SheetImportOptions,
+  SheetImportResult,
+  SheetExportOptions,
+  SheetCellStyle,
+  SheetBorderStyle,
   NotificationAdapter,
 } from './plugins';
 

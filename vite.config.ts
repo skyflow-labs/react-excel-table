@@ -21,8 +21,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
-        'plugins/excel-import/index': resolve(__dirname, 'src/plugins/excel-import/index.ts'),
-        'plugins/excel-export/index': resolve(__dirname, 'src/plugins/excel-export/index.ts'),
+        'plugins/sheet-import/index': resolve(__dirname, 'src/plugins/sheet-import/index.ts'),
+        'plugins/sheet-export/index': resolve(__dirname, 'src/plugins/sheet-export/index.ts'),
       },
       formats: ['es', 'cjs'],
     },

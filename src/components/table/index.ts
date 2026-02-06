@@ -1,4 +1,4 @@
-export { ExcelTable } from './ExcelTable';
+export { SheetTable } from './SheetTable';
 export { TableHeader } from './TableHeader';
 export type { TableHeaderProps } from './TableHeader';
 export { TableBody } from './TableBody';

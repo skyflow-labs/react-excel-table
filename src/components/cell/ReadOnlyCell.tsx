@@ -47,5 +47,5 @@ export function ReadOnlyCell({
     }
   };
 
-  return <div className={`excel-table-cell--readonly ${className}`}>{renderValue()}</div>;
+  return <div className={`sheet-table-cell--readonly ${className}`}>{renderValue()}</div>;
 }

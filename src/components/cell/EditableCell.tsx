@@ -544,7 +544,7 @@ export function EditableCell<TData extends RowData>({
           px-2 w-full py-2 h-full cursor-pointer
           overflow-hidden text-ellipsis whitespace-nowrap
           focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500
-          ${isCellModified ? 'excel-table-cell--modified' : ''}
+          ${isCellModified ? 'sheet-table-cell--modified' : ''}
         `}
         onClick={handleCellClick}
         onKeyDown={handleKeyDown}

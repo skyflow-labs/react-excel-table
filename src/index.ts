@@ -1,10 +1,10 @@
 // Main component
-export { ExcelTable } from '@/components/table/ExcelTable';
+export { SheetTable } from '@/components/table/SheetTable';
 
 // Configuration Provider
 export {
-  ExcelTableProvider,
-  useExcelTableConfig,
+  SheetTableProvider,
+  useSheetTableConfig,
   useLocaleConfig,
   useImportSecurityConfig,
   useExportSecurityConfig,
@@ -16,11 +16,11 @@ export {
   LOCALE_PRESETS,
 } from '@/config';
 export type {
-  ExcelTableConfig,
+  SheetTableConfig,
   LocaleConfig,
   ImportSecurityConfig,
   ExportSecurityConfig,
-  ExcelTableProviderProps,
+  SheetTableProviderProps,
 } from '@/config';
 
 // Table components
@@ -70,7 +70,7 @@ export type {
 
 // Hooks
 export {
-  useExcelTable,
+  useSheetTable,
   useAutosize,
   useBasicAutosize,
   usePreciseAutosize,
@@ -147,9 +147,9 @@ export type {
   // Table types
   TableState,
   TableActions,
-  UseExcelTableReturn,
-  ExcelTableProps,
-  UseExcelTableProps,
+  UseSheetTableReturn,
+  SheetTableProps,
+  UseSheetTableProps,
   TableContextValue,
   Table,
   Row,
@@ -174,11 +174,11 @@ export type {
   OnRowSelectionChange,
   OnFullscreenChange,
   // Plugin types
-  ExcelImportOptions,
-  ExcelImportResult,
-  ExcelExportOptions,
-  ExcelCellStyle,
-  ExcelBorderStyle,
+  SheetImportOptions,
+  SheetImportResult,
+  SheetExportOptions,
+  SheetCellStyle,
+  SheetBorderStyle,
   NotificationAdapter,
 } from '@/types';
 
@@ -199,4 +199,4 @@ export type {
 } from '@/utils/security';
 
 // Styles
-export { excelTablePreset } from '@/styles/tailwind';
+export { sheetTablePreset } from '@/styles/tailwind';

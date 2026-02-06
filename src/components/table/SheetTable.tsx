@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { RowData, ExcelTableProps } from '@/types';
-import { useExcelTable } from '@/hooks/internal/useExcelTable';
+import type { RowData, SheetTableProps } from '@/types';
+import { useSheetTable } from '@/hooks/internal/useSheetTable';
 import { useKeyboardNavigation } from '@/hooks/internal/useKeyboardNavigation';
 import { TableHeader } from './TableHeader';
 import { TableBody } from './TableBody';
@@ -11,11 +11,11 @@ import { DeleteModal } from '@/components/controls/DeleteModal';
 import '@/styles/variables.css';
 
 /**
- * Main Excel-like table component
+ * Main spreadsheet-style table component
  *
  * @example
  * ```tsx
- * <ExcelTable
+ * <SheetTable
  *   data={transactions}
  *   columns={columnConfigs}
  *   onSave={handleSave}
@@ -24,7 +24,7 @@ import '@/styles/variables.css';
  * />
  * ```
  */
-export function ExcelTable<TData extends RowData>({
+export function SheetTable<TData extends RowData>({
   data,
   loading = false,
   columns: columnConfigs,
@@ -37,7 +37,7 @@ export function ExcelTable<TData extends RowData>({
   isLinkedRow,
   defaultFullscreen: _defaultFullscreen = false,
   className = '',
-}: ExcelTableProps<TData>) {
+}: SheetTableProps<TData>) {
   // Main table logic — columns are built inside the hook and passed
   // directly to useReactTable, so getHeaderGroups() works on first render.
   const {
@@ -56,7 +56,7 @@ export function ExcelTable<TData extends RowData>({
     expandedColumns,
     columnWidthOverrides,
     totalRowWidth,
-  } = useExcelTable({
+  } = useSheetTable({
     data,
     columns: columnConfigs,
     onDataChange,

@@ -6,7 +6,7 @@ import {
   sanitizeImportData,
   isSuspiciousFilename,
 } from '../utils/security/sanitizer';
-import { DEFAULT_IMPORT_SECURITY } from '../config/ExcelTableProvider';
+import { DEFAULT_IMPORT_SECURITY } from '../config/SheetTableProvider';
 
 describe('Security Utils', () => {
   describe('validateFile', () => {

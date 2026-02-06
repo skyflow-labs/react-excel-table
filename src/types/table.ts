@@ -3,7 +3,7 @@ import type { RowData, ColumnConfig } from './column';
 import type { CellValue, ModifiedCells } from './cell';
 
 /**
- * State of the Excel table
+ * State of the sheet table
  */
 export interface TableState<TData extends RowData> {
   /** The underlying TanStack table instance */
@@ -44,7 +44,7 @@ export interface TableState<TData extends RowData> {
 }
 
 /**
- * Actions available on the Excel table
+ * Actions available on the sheet table
  */
 export interface TableActions<TData extends RowData = RowData> {
   /** Set the modified cells state */
@@ -81,7 +81,7 @@ export interface TableActions<TData extends RowData = RowData> {
 /**
  * Combined table state and actions
  */
-export interface UseExcelTableReturn<TData extends RowData>
+export interface UseSheetTableReturn<TData extends RowData>
   extends TableState<TData>,
     TableActions<TData> {
   /** Number of modified cells */
@@ -96,9 +96,9 @@ export interface UseExcelTableReturn<TData extends RowData>
 }
 
 /**
- * Props for the main ExcelTable component
+ * Props for the main SheetTable component
  */
-export interface ExcelTableProps<TData extends RowData> {
+export interface SheetTableProps<TData extends RowData> {
   /** Data array to display */
   data: TData[];
 
@@ -158,7 +158,7 @@ export interface ExcelTableProps<TData extends RowData> {
 /**
  * Props for table hooks
  */
-export interface UseExcelTableProps<TData extends RowData> {
+export interface UseSheetTableProps<TData extends RowData> {
   /** External data array */
   data: TData[];
 

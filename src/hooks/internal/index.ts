@@ -19,4 +19,4 @@ export type { UseAutosizeOptions, UseAutosizeReturn } from './useAutosize';
 export { useTableActions } from './useTableActions';
 export type { UseTableActionsProps, UseTableActionsReturn } from './useTableActions';
 
-export { useExcelTable } from './useExcelTable';
+export { useSheetTable } from './useSheetTable';

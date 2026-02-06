@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-export interface ExcelImportButtonProps {
+export interface SheetImportButtonProps {
   /** Handler when file is selected */
   onFileSelect: (file: File) => void;
 
@@ -21,16 +21,16 @@ export interface ExcelImportButtonProps {
 }
 
 /**
- * Button component for triggering Excel/CSV import
+ * Button component for triggering spreadsheet/CSV import
  */
-export function ExcelImportButton({
+export function SheetImportButton({
   onFileSelect,
   isImporting = false,
   accept = '.csv,.xlsx,.xls',
   label = 'Import',
   className = '',
   disabled = false,
-}: ExcelImportButtonProps) {
+}: SheetImportButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {

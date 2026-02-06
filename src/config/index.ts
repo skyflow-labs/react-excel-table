@@ -1,6 +1,6 @@
 export {
-  ExcelTableProvider,
-  useExcelTableConfig,
+  SheetTableProvider,
+  useSheetTableConfig,
   useLocaleConfig,
   useImportSecurityConfig,
   useExportSecurityConfig,
@@ -10,9 +10,9 @@ export {
   DEFAULT_EXPORT_SECURITY,
   DEFAULT_BEHAVIOR,
   LOCALE_PRESETS,
-  type ExcelTableConfig,
+  type SheetTableConfig,
   type LocaleConfig,
   type ImportSecurityConfig,
   type ExportSecurityConfig,
-  type ExcelTableProviderProps,
-} from './ExcelTableProvider';
+  type SheetTableProviderProps,
+} from './SheetTableProvider';

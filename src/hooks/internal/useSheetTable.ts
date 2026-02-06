@@ -16,8 +16,8 @@ import type {
   RowData,
   ModifiedCells,
   CellValue,
-  UseExcelTableProps,
-  UseExcelTableReturn,
+  UseSheetTableProps,
+  UseSheetTableReturn,
 } from '@/types';
 import { useCellEdit } from './useCellEdit';
 import { useTableActions } from './useTableActions';
@@ -26,7 +26,7 @@ import { calculateOptimalColumnWidthPrecise } from '@/utils/autosize/calculator'
 import type { CellDataType } from '@/types';
 
 /**
- * Main hook for the Excel table component
+ * Main hook for the sheet table component
  *
  * @param props - Hook configuration
  * @returns Table state and actions
@@ -40,7 +40,7 @@ import type { CellDataType } from '@/types';
  *   handleCellEdit,
  *   handleSaveChanges,
  *   handleAddRow,
- * } = useExcelTable({
+ * } = useSheetTable({
  *   data,
  *   columns,
  *   onSave,
@@ -49,7 +49,7 @@ import type { CellDataType } from '@/types';
  * });
  * ```
  */
-export function useExcelTable<TData extends RowData>({
+export function useSheetTable<TData extends RowData>({
   data: externalData,
   columns: columnConfigs,
   onDataChange,
@@ -57,7 +57,7 @@ export function useExcelTable<TData extends RowData>({
   onDelete,
   onSave,
   isReadOnlyRow,
-}: UseExcelTableProps<TData>): UseExcelTableReturn<TData> {
+}: UseSheetTableProps<TData>): UseSheetTableReturn<TData> {
   // Internal state
   const [internalData, setInternalData] = useState<TData[]>(externalData);
   const [sorting, setSorting] = useState<SortingState>([]);

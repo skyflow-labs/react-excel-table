@@ -1,8 +1,8 @@
-# react-excel-table
+# react-sheet-table
 
-A powerful, secure, and customizable Excel-like data table for React.
+A powerful, secure, and customizable Spreadsheet-style data table for React.
 
-[![npm version](https://img.shields.io/npm/v/react-excel-table.svg)](https://www.npmjs.com/package/react-excel-table)
+[![npm version](https://img.shields.io/npm/v/react-sheet-table.svg)](https://www.npmjs.com/package/react-sheet-table)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -19,7 +19,7 @@ A powerful, secure, and customizable Excel-like data table for React.
 ## Installation
 
 ```bash
-npm install react-excel-table
+npm install react-sheet-table
 ```
 
 **Peer dependencies:**
@@ -32,8 +32,8 @@ npm install react react-dom @tanstack/react-table react-window
 ## Quick Start
 
 ```tsx
-import { ExcelTable } from 'react-excel-table';
-import 'react-excel-table/styles';
+import { SheetTable } from 'react-sheet-table';
+import 'react-sheet-table/styles';
 
 const data = [
   { id: '1', name: 'John', email: 'john@example.com', amount: 1500 },
@@ -47,7 +47,7 @@ const columns = [
 ];
 
 function App() {
-  return <ExcelTable data={data} columns={columns} />;
+  return <SheetTable data={data} columns={columns} />;
 }
 ```
 
@@ -60,7 +60,7 @@ That's it. You have a working editable table.
 ### Save Changes
 
 ```tsx
-<ExcelTable
+<SheetTable
   data={data}
   columns={columns}
   onSave={async (data, modifiedCells) => {
@@ -74,7 +74,7 @@ That's it. You have a working editable table.
 ### Add and Delete Rows
 
 ```tsx
-<ExcelTable
+<SheetTable
   data={data}
   columns={columns}
   onAddRow={() => ({
@@ -93,7 +93,7 @@ That's it. You have a working editable table.
 ### Read-Only Rows
 
 ```tsx
-<ExcelTable
+<SheetTable
   data={data}
   columns={columns}
   isReadOnlyRow={(row) => row.status === 'locked'}
@@ -113,7 +113,7 @@ const columns = [
 ### Track Changes in Real-Time
 
 ```tsx
-<ExcelTable
+<SheetTable
   data={data}
   columns={columns}
   onModifiedCellsChange={(cells) => {
@@ -125,7 +125,7 @@ const columns = [
 ### Loading State
 
 ```tsx
-<ExcelTable data={data} columns={columns} loading={isLoading} />
+<SheetTable data={data} columns={columns} loading={isLoading} />
 ```
 
 ---
@@ -204,26 +204,26 @@ const columns = [
 ```css
 :root {
   /* Colors */
-  --excel-primary: #30867B;
-  --excel-primary-hover: #2D9084;
-  --excel-danger: #ef4444;
-  --excel-success: #22c55e;
+  --sheet-primary: #30867B;
+  --sheet-primary-hover: #2D9084;
+  --sheet-danger: #ef4444;
+  --sheet-success: #22c55e;
 
   /* Cell States */
-  --excel-cell-modified-bg: #2D9084;
-  --excel-cell-modified-text: #ffffff;
-  --excel-cell-readonly-bg: #f3f4f6;
-  --excel-cell-hover-bg: #f9fafb;
+  --sheet-cell-modified-bg: #2D9084;
+  --sheet-cell-modified-text: #ffffff;
+  --sheet-cell-readonly-bg: #f3f4f6;
+  --sheet-cell-hover-bg: #f9fafb;
 
   /* Layout */
-  --excel-row-height: 40px;
-  --excel-header-height: 44px;
-  --excel-border-color: #e5e7eb;
-  --excel-border-radius: 0.375rem;
+  --sheet-row-height: 40px;
+  --sheet-header-height: 44px;
+  --sheet-border-color: #e5e7eb;
+  --sheet-border-radius: 0.375rem;
 
   /* Typography */
-  --excel-font-family: system-ui, sans-serif;
-  --excel-font-size: 14px;
+  --sheet-font-family: system-ui, sans-serif;
+  --sheet-font-size: 14px;
 }
 ```
 
@@ -231,39 +231,39 @@ const columns = [
 
 ```tsx
 // Compact
-<ExcelTable className="excel-table--compact" ... />
+<SheetTable className="sheet-table--compact" ... />
 
 // Comfortable (spacious)
-<ExcelTable className="excel-table--comfortable" ... />
+<SheetTable className="sheet-table--comfortable" ... />
 
 // Bordered cells
-<ExcelTable className="excel-table--bordered" ... />
+<SheetTable className="sheet-table--bordered" ... />
 
 // Striped rows
-<ExcelTable className="excel-table--striped" ... />
+<SheetTable className="sheet-table--striped" ... />
 
 // No borders
-<ExcelTable className="excel-table--borderless" ... />
+<SheetTable className="sheet-table--borderless" ... />
 ```
 
 ### Color Themes
 
 ```tsx
-<ExcelTable className="excel-theme--blue" ... />
-<ExcelTable className="excel-theme--purple" ... />
-<ExcelTable className="excel-theme--orange" ... />
-<ExcelTable className="excel-theme--rose" ... />
+<SheetTable className="sheet-theme--blue" ... />
+<SheetTable className="sheet-theme--purple" ... />
+<SheetTable className="sheet-theme--orange" ... />
+<SheetTable className="sheet-theme--rose" ... />
 ```
 
 ### Dark Mode
 
 ```css
 [data-theme="dark"] {
-  --excel-primary: #4ade80;
-  --excel-cell-modified-bg: #166534;
-  --excel-cell-readonly-bg: #1f2937;
-  --excel-border-color: #374151;
-  --excel-cell-hover-bg: #1f2937;
+  --sheet-primary: #4ade80;
+  --sheet-cell-modified-bg: #166534;
+  --sheet-cell-readonly-bg: #1f2937;
+  --sheet-border-color: #374151;
+  --sheet-cell-hover-bg: #1f2937;
 }
 ```
 
@@ -271,10 +271,10 @@ const columns = [
 
 ```js
 // tailwind.config.js
-import { excelTablePreset } from 'react-excel-table/styles';
+import { sheetTablePreset } from 'react-sheet-table/styles';
 
 export default {
-  presets: [excelTablePreset],
+  presets: [sheetTablePreset],
 }
 ```
 
@@ -285,11 +285,11 @@ export default {
 Set defaults for all tables:
 
 ```tsx
-import { ExcelTableProvider, LOCALE_PRESETS } from 'react-excel-table';
+import { SheetTableProvider, LOCALE_PRESETS } from 'react-sheet-table';
 
 function App() {
   return (
-    <ExcelTableProvider
+    <SheetTableProvider
       locale={{
         ...LOCALE_PRESETS['es-MX'],
         currency: 'MXN',
@@ -297,7 +297,7 @@ function App() {
       }}
     >
       <YourApp />
-    </ExcelTableProvider>
+    </SheetTableProvider>
   );
 }
 ```
@@ -325,10 +325,10 @@ npm install papaparse
 ```
 
 ```tsx
-import { useExcelImport } from 'react-excel-table/plugins/excel-import';
+import { useSheetImport } from 'react-sheet-table/plugins/sheet-import';
 
 function ImportButton() {
-  const { importFile, isImporting } = useExcelImport({
+  const { importFile, isImporting } = useSheetImport({
     columnMapping: {
       'Fecha': 'date',
       'Monto': 'amount',
@@ -349,7 +349,7 @@ function ImportButton() {
 ### Security Options
 
 ```tsx
-useExcelImport({
+useSheetImport({
   columnMapping,
   security: {
     maxFileSize: 5 * 1024 * 1024, // 5MB
@@ -372,17 +372,17 @@ npm install exceljs  # For Excel export
 ```
 
 ```tsx
-import { useExcelExport, exportToCSV } from 'react-excel-table/plugins/excel-export';
+import { useSheetExport, exportToCSV } from 'react-sheet-table/plugins/sheet-export';
 
 function ExportButtons({ data, columns }) {
-  const { exportToExcel, isExporting } = useExcelExport(data, {
+  const { exportToXlsx, isExporting } = useSheetExport(data, {
     filename: 'report',
     columns,
   });
 
   return (
     <>
-      <button onClick={exportToExcel}>Export Excel</button>
+      <button onClick={exportToXlsx}>Export .xlsx</button>
       <button onClick={() => exportToCSV(data, { filename: 'report' })}>
         Export CSV
       </button>
@@ -409,7 +409,7 @@ function ExportButtons({ data, columns }) {
 ## TypeScript
 
 ```tsx
-import type { ColumnConfig, RowData } from 'react-excel-table';
+import type { ColumnConfig, RowData } from 'react-sheet-table';
 
 // Your data must have an id field
 interface Transaction extends RowData {
@@ -429,7 +429,7 @@ const columns: ColumnConfig<Transaction>[] = [
 
 ## API Reference
 
-### ExcelTable Props
+### SheetTable Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -471,7 +471,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
+## Trademarks
+
+Microsoft and Excel are trademarks of the Microsoft group of companies. This project is not affiliated with, endorsed by, or sponsored by Microsoft Corporation.
+
 ## License
 
 MIT
-# react-excel-table

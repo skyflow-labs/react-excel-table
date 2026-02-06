@@ -1,5 +1,5 @@
 // Main table component
-export { ExcelTable } from './table/ExcelTable';
+export { SheetTable } from './table/SheetTable';
 export { TableHeader, TableBody, buildColumn, buildColumns, getColumns } from './table';
 export type { TableHeaderProps, TableBodyProps, BuildColumnOptions, BuildColumnsProps } from './table';
 

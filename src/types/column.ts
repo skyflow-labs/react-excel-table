@@ -1,5 +1,5 @@
 /**
- * Supported cell data types for the Excel table
+ * Supported cell data types for the sheet table
  */
 export type CellDataType = 'string' | 'number' | 'date' | 'currency' | 'boolean' | 'select';
 
@@ -87,7 +87,7 @@ export interface ColumnMeta<TData = unknown> {
 }
 
 /**
- * Column configuration for the Excel table
+ * Column configuration for the sheet table
  */
 export interface ColumnConfig<TData extends RowData = RowData> {
   /** The key to access the data from the row object */

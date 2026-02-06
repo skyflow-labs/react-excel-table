@@ -1,5 +1,5 @@
 // Public hooks
-export { useExcelTable } from './internal/useExcelTable';
+export { useSheetTable } from './internal/useSheetTable';
 export { useAutosize, useBasicAutosize, usePreciseAutosize } from './internal/useAutosize';
 export { useKeyboardNavigation, useCellNavigation } from './internal/useKeyboardNavigation';
 

@@ -1,4 +1,4 @@
-export interface ExcelExportButtonProps {
+export interface SheetExportButtonProps {
   /** Export handler */
   onExport: () => Promise<void>;
 
@@ -16,15 +16,15 @@ export interface ExcelExportButtonProps {
 }
 
 /**
- * Button component for triggering Excel export
+ * Button component for triggering spreadsheet export
  */
-export function ExcelExportButton({
+export function SheetExportButton({
   onExport,
   isExporting = false,
   label = 'Export',
   className = '',
   disabled = false,
-}: ExcelExportButtonProps) {
+}: SheetExportButtonProps) {
   const handleClick = async () => {
     try {
       await onExport();

@@ -2,9 +2,9 @@ import type { RowData, ColumnConfig } from './column';
 import type { CellValue } from './cell';
 
 /**
- * Excel import plugin options
+ * Spreadsheet import plugin options
  */
-export interface ExcelImportOptions<TData extends RowData = RowData> {
+export interface SheetImportOptions<TData extends RowData = RowData> {
   /**
    * Column mapping from CSV headers to data keys
    * Key is the CSV header name, value is the data key
@@ -55,9 +55,9 @@ export interface ExcelImportOptions<TData extends RowData = RowData> {
 }
 
 /**
- * Excel import result
+ * Spreadsheet import result
  */
-export interface ExcelImportResult<TData extends RowData> {
+export interface SheetImportResult<TData extends RowData> {
   /** Successfully imported rows */
   rows: TData[];
 
@@ -73,9 +73,9 @@ export interface ExcelImportResult<TData extends RowData> {
 }
 
 /**
- * Excel export plugin options
+ * Spreadsheet export plugin options
  */
-export interface ExcelExportOptions<TData extends RowData = RowData> {
+export interface SheetExportOptions<TData extends RowData = RowData> {
   /** Filename for the exported file (without extension) */
   filename?: string;
 
@@ -109,12 +109,12 @@ export interface ExcelExportOptions<TData extends RowData = RowData> {
   /**
    * Header row style
    */
-  headerStyle?: ExcelCellStyle;
+  headerStyle?: SheetCellStyle;
 
   /**
    * Data row style
    */
-  dataStyle?: ExcelCellStyle;
+  dataStyle?: SheetCellStyle;
 
   /**
    * Callback when export starts
@@ -133,9 +133,9 @@ export interface ExcelExportOptions<TData extends RowData = RowData> {
 }
 
 /**
- * Excel cell style options
+ * Spreadsheet cell style options
  */
-export interface ExcelCellStyle {
+export interface SheetCellStyle {
   /** Font configuration */
   font?: {
     name?: string;
@@ -154,10 +154,10 @@ export interface ExcelCellStyle {
 
   /** Border configuration */
   border?: {
-    top?: ExcelBorderStyle;
-    bottom?: ExcelBorderStyle;
-    left?: ExcelBorderStyle;
-    right?: ExcelBorderStyle;
+    top?: SheetBorderStyle;
+    bottom?: SheetBorderStyle;
+    left?: SheetBorderStyle;
+    right?: SheetBorderStyle;
   };
 
   /** Alignment configuration */
@@ -172,9 +172,9 @@ export interface ExcelCellStyle {
 }
 
 /**
- * Excel border style
+ * Spreadsheet border style
  */
-export interface ExcelBorderStyle {
+export interface SheetBorderStyle {
   style: 'thin' | 'medium' | 'thick' | 'dotted' | 'dashed';
   color?: string;
 }

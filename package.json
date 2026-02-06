@@ -1,7 +1,7 @@
 {
-  "name": "react-excel-table",
+  "name": "react-sheet-table",
   "version": "1.2.1",
-  "description": "Excel-like editable data table for React with virtualization, keyboard navigation, and Excel import/export",
+  "description": "Spreadsheet-style editable data table for React with virtualization, keyboard navigation, and .xlsx import/export",
   "license": "MIT",
   "author": "SkyflowLabs",
   "type": "module",
@@ -19,24 +19,24 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./plugins/excel-import": {
+    "./plugins/sheet-import": {
       "import": {
-        "types": "./dist/plugins/excel-import/index.d.ts",
-        "default": "./dist/plugins/excel-import/index.js"
+        "types": "./dist/plugins/sheet-import/index.d.ts",
+        "default": "./dist/plugins/sheet-import/index.js"
       },
       "require": {
-        "types": "./dist/plugins/excel-import/index.d.cts",
-        "default": "./dist/plugins/excel-import/index.cjs"
+        "types": "./dist/plugins/sheet-import/index.d.cts",
+        "default": "./dist/plugins/sheet-import/index.cjs"
       }
     },
-    "./plugins/excel-export": {
+    "./plugins/sheet-export": {
       "import": {
-        "types": "./dist/plugins/excel-export/index.d.ts",
-        "default": "./dist/plugins/excel-export/index.js"
+        "types": "./dist/plugins/sheet-export/index.d.ts",
+        "default": "./dist/plugins/sheet-export/index.js"
       },
       "require": {
-        "types": "./dist/plugins/excel-export/index.d.cts",
-        "default": "./dist/plugins/excel-export/index.cjs"
+        "types": "./dist/plugins/sheet-export/index.d.cts",
+        "default": "./dist/plugins/sheet-export/index.cjs"
       }
     },
     "./styles": "./dist/styles/index.css"
@@ -117,15 +117,21 @@
   },
   "keywords": [
     "react",
-    "excel",
-    "table",
-    "editable",
     "spreadsheet",
+    "table",
+    "grid",
     "data-grid",
+    "datasheet",
+    "editable",
+    "editable-table",
+    "sheet",
+    "cell-editor",
     "virtualization",
     "keyboard-navigation",
     "import",
-    "export"
+    "export",
+    "csv",
+    "xlsx"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -133,10 +139,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/skyflow-labs/react-excel-table.git"
+    "url": "git+https://github.com/skyflow-labs/react-sheet-table.git"
   },
   "bugs": {
-    "url": "https://github.com/skyflow-labs/react-excel-table/issues"
+    "url": "https://github.com/skyflow-labs/react-sheet-table/issues"
   },
-  "homepage": "https://github.com/skyflow-labs/react-excel-table#readme"
+  "homepage": "https://github.com/skyflow-labs/react-sheet-table#readme"
 }

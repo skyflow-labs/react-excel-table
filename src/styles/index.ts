@@ -1,3 +1,3 @@
 import './variables.css';
 
-export { excelTablePreset } from './tailwind';
+export { sheetTablePreset } from './tailwind';

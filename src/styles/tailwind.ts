@@ -1,70 +1,70 @@
 /**
- * Tailwind CSS preset for skyflowlabs-excel
+ * Tailwind CSS preset for react-sheet-table
  *
  * Add this to your tailwind.config.js:
  *
  * @example
  * ```js
- * import { excelTablePreset } from 'skyflowlabs-excel/styles';
+ * import { sheetTablePreset } from 'react-sheet-table/styles';
  *
  * export default {
- *   presets: [excelTablePreset],
+ *   presets: [sheetTablePreset],
  *   // ... your config
  * }
  * ```
  */
-export const excelTablePreset = {
+export const sheetTablePreset = {
   theme: {
     extend: {
       colors: {
-        'excel-primary': 'var(--excel-primary)',
-        'excel-primary-hover': 'var(--excel-primary-hover)',
-        'excel-primary-light': 'var(--excel-primary-light)',
-        'excel-danger': 'var(--excel-danger)',
-        'excel-danger-hover': 'var(--excel-danger-hover)',
-        'excel-warning': 'var(--excel-warning)',
-        'excel-warning-hover': 'var(--excel-warning-hover)',
-        'excel-success': 'var(--excel-success)',
-        'excel-success-hover': 'var(--excel-success-hover)',
-        'excel-info': 'var(--excel-info)',
-        'excel-info-hover': 'var(--excel-info-hover)',
-        'excel-cell-modified': 'var(--excel-cell-modified-bg)',
-        'excel-cell-readonly': 'var(--excel-cell-readonly-bg)',
+        'sheet-primary': 'var(--sheet-primary)',
+        'sheet-primary-hover': 'var(--sheet-primary-hover)',
+        'sheet-primary-light': 'var(--sheet-primary-light)',
+        'sheet-danger': 'var(--sheet-danger)',
+        'sheet-danger-hover': 'var(--sheet-danger-hover)',
+        'sheet-warning': 'var(--sheet-warning)',
+        'sheet-warning-hover': 'var(--sheet-warning-hover)',
+        'sheet-success': 'var(--sheet-success)',
+        'sheet-success-hover': 'var(--sheet-success-hover)',
+        'sheet-info': 'var(--sheet-info)',
+        'sheet-info-hover': 'var(--sheet-info-hover)',
+        'sheet-cell-modified': 'var(--sheet-cell-modified-bg)',
+        'sheet-cell-readonly': 'var(--sheet-cell-readonly-bg)',
       },
       fontFamily: {
-        excel: 'var(--excel-font-family)',
+        sheet: 'var(--sheet-font-family)',
       },
       fontSize: {
-        'excel-base': 'var(--excel-font-size)',
-        'excel-sm': 'var(--excel-font-size-sm)',
+        'sheet-base': 'var(--sheet-font-size)',
+        'sheet-sm': 'var(--sheet-font-size-sm)',
       },
       spacing: {
-        'excel-row': 'var(--excel-row-height)',
-        'excel-header': 'var(--excel-header-height)',
+        'sheet-row': 'var(--sheet-row-height)',
+        'sheet-header': 'var(--sheet-header-height)',
       },
       borderRadius: {
-        excel: 'var(--excel-border-radius)',
+        sheet: 'var(--sheet-border-radius)',
       },
       boxShadow: {
-        'excel-sm': 'var(--excel-shadow-sm)',
-        excel: 'var(--excel-shadow)',
-        'excel-md': 'var(--excel-shadow-md)',
-        'excel-lg': 'var(--excel-shadow-lg)',
+        'sheet-sm': 'var(--sheet-shadow-sm)',
+        sheet: 'var(--sheet-shadow)',
+        'sheet-md': 'var(--sheet-shadow-md)',
+        'sheet-lg': 'var(--sheet-shadow-lg)',
       },
       zIndex: {
-        'excel-dropdown': 'var(--excel-z-dropdown)',
-        'excel-modal-backdrop': 'var(--excel-z-modal-backdrop)',
-        'excel-modal': 'var(--excel-z-modal)',
-        'excel-fab': 'var(--excel-z-fab)',
-        'excel-fullscreen': 'var(--excel-z-fullscreen)',
+        'sheet-dropdown': 'var(--sheet-z-dropdown)',
+        'sheet-modal-backdrop': 'var(--sheet-z-modal-backdrop)',
+        'sheet-modal': 'var(--sheet-z-modal)',
+        'sheet-fab': 'var(--sheet-z-fab)',
+        'sheet-fullscreen': 'var(--sheet-z-fullscreen)',
       },
       transitionDuration: {
-        'excel-fast': '150ms',
-        'excel-normal': '200ms',
-        'excel-slow': '300ms',
+        'sheet-fast': '150ms',
+        'sheet-normal': '200ms',
+        'sheet-slow': '300ms',
       },
     },
   },
 };
 
-export default excelTablePreset;
+export default sheetTablePreset;

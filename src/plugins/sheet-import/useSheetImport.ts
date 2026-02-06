@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { RowData, ExcelImportOptions, ExcelImportResult, ModifiedCells } from '@/types';
+import type { RowData, SheetImportOptions, SheetImportResult, ModifiedCells } from '@/types';
 import { transformRow, autoDetectColumnMapping } from './parsers';
 import { validateFile, sanitizeRow } from '@/utils/security';
 import { DEFAULT_IMPORT_SECURITY, type ImportSecurityConfig } from '@/config';
@@ -7,7 +7,7 @@ import { DEFAULT_IMPORT_SECURITY, type ImportSecurityConfig } from '@/config';
 /**
  * Extended options for secure import
  */
-export interface SecureImportOptions<TData extends RowData> extends ExcelImportOptions<TData> {
+export interface SecureImportOptions<TData extends RowData> extends SheetImportOptions<TData> {
   /**
    * Security configuration for import
    * @default DEFAULT_IMPORT_SECURITY (all protections enabled)
@@ -23,31 +23,31 @@ export interface SecureImportOptions<TData extends RowData> extends ExcelImportO
 }
 
 /**
- * Return value from useExcelImport hook
+ * Return value from useSheetImport hook
  */
-export interface UseExcelImportReturn<TData extends RowData> {
+export interface UseSheetImportReturn<TData extends RowData> {
   /** Import a file */
-  importFile: (file: File) => Promise<ExcelImportResult<TData>>;
+  importFile: (file: File) => Promise<SheetImportResult<TData>>;
 
   /** Whether import is in progress */
   isImporting: boolean;
 
   /** Last import result */
-  lastResult: ExcelImportResult<TData> | null;
+  lastResult: SheetImportResult<TData> | null;
 
   /** Last error */
   error: Error | null;
 }
 
 /**
- * Hook for importing Excel/CSV files
+ * Hook for importing spreadsheet/CSV files
  *
  * @param options - Import configuration
  * @returns Import functions and state
  *
  * @example
  * ```tsx
- * const { importFile, isImporting } = useExcelImport<Transaction>({
+ * const { importFile, isImporting } = useSheetImport<Transaction>({
  *   columnMapping: {
  *     'Date': 'created_at',
  *     'Amount': 'amount',
@@ -62,15 +62,15 @@ export interface UseExcelImportReturn<TData extends RowData> {
  * };
  * ```
  */
-export function useExcelImport<TData extends RowData>(
+export function useSheetImport<TData extends RowData>(
   options: SecureImportOptions<TData> = {}
-): UseExcelImportReturn<TData> {
+): UseSheetImportReturn<TData> {
   const [isImporting, setIsImporting] = useState(false);
-  const [lastResult, setLastResult] = useState<ExcelImportResult<TData> | null>(null);
+  const [lastResult, setLastResult] = useState<SheetImportResult<TData> | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   const importFile = useCallback(
-    async (file: File): Promise<ExcelImportResult<TData>> => {
+    async (file: File): Promise<SheetImportResult<TData>> => {
       const {
         columnMapping,
         dateFormats: _dateFormats,
@@ -111,14 +111,14 @@ export function useExcelImport<TData extends RowData>(
         // Dynamically import papaparse
         const Papa = await import('papaparse');
 
-        return new Promise<ExcelImportResult<TData>>((resolve, reject) => {
+        return new Promise<SheetImportResult<TData>>((resolve, reject) => {
           Papa.default.parse(file, {
             header: true,
             skipEmptyLines: skipEmptyRows,
             complete: (results) => {
               try {
                 const rows: TData[] = [];
-                const errors: ExcelImportResult<TData>['errors'] = [];
+                const errors: SheetImportResult<TData>['errors'] = [];
                 const warnings: string[] = [];
 
                 // Get headers from first row
@@ -185,7 +185,7 @@ export function useExcelImport<TData extends RowData>(
                   });
                 }
 
-                const result: ExcelImportResult<TData> = {
+                const result: SheetImportResult<TData> = {
                   rows,
                   errors,
                   warnings,
